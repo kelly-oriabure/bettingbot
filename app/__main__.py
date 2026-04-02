@@ -5,9 +5,15 @@ import os
 import sys
 import asyncio
 import logging
-from dotenv import load_dotenv
 
-load_dotenv()
+# Load .env from project directory (before other imports that may read env vars)
+from dotenv import load_dotenv, dotenv_values
+_env_path = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".env"))
+if os.path.exists(_env_path):
+    _env_vals = dotenv_values(_env_path)
+    for _k, _v in _env_vals.items():
+        if _v and _k not in os.environ:
+            os.environ[_k] = _v
 
 logging.basicConfig(
     level=logging.INFO,
