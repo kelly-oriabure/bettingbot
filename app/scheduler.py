@@ -1,131 +1,152 @@
 """
 Scheduled morning predictions sender.
 
-Sends curated predictions to subscribed users at 6 AM (Africa/Lagos time).
-This module is called by the scheduler or cron job.
+Sends curated predictions via:
+1. Telegram channel broadcast (all subscribers see it)
+2. VIP user DMs (priority alerts)
 
 Usage:
-    python -m app.scheduler
-
-Or integrate with the main bot's APScheduler.
+    Set TELEGRAM_CHANNEL env var to channel username (e.g. @BettingBotPicks)
+    Integrated with the main bot's APScheduler at 5 AM UTC (6 AM Lagos).
 """
 
 import os
 import asyncio
+import json
 import logging
 from datetime import datetime
+from typing import Dict, List, Optional
 
 from telegram import Bot
-from telegram.error import Forbidden
+from telegram.error import Forbidden, BadRequest
 
 logger = logging.getLogger(__name__)
 
-# Lagos is UTC+1, so 6 AM Lagos = 5 AM UTC
-MORNING_HOUR_UTC = 5
+# Channel username — set via env var after creating the channel
+# Can be @username or numeric channel ID (-100...)
+CHANNEL_USERNAME = os.environ.get("TELEGRAM_CHANNEL", "")
 
 
 async def send_morning_predictions(bot_token: str, user_db: dict):
     """
-    Send morning predictions to all subscribed users.
-    
-    Args:
-        bot_token: Telegram bot token
-        user_db: Dict of {user_id: user_data} (from bot.py USERS dict)
+    Send morning predictions:
+    1. Broadcast to channel (all subscribers see it)
+    2. DM VIP users with priority summary
     """
     bot = Bot(token=bot_token)
     
     logger.info("Generating morning predictions...")
     
-    # Get today's fixtures and run predictions
     predictions = await _get_morning_predictions()
     
     if not predictions:
         logger.warning("No predictions generated for morning send")
         return
     
-    # Build the morning message
-    header = (
-        "🌅 **Good Morning! Here are today's picks**\n\n"
-        f"📅 {datetime.utcnow().strftime('%A, %B %d, %Y')}\n"
-        f"⚽ {len(predictions)} matches with predictions\n\n"
-    )
+    # ── 1. Broadcast to channel ──
+    channel_msg = _format_channel_broadcast(predictions)
     
+    if CHANNEL_USERNAME:
+        try:
+            await bot.send_message(
+                chat_id=CHANNEL_USERNAME,
+                text=channel_msg,
+                parse_mode="Markdown",
+            )
+            logger.info(f"✅ Channel broadcast sent to {CHANNEL_USERNAME}")
+        except BadRequest as e:
+            logger.error(f"Channel broadcast failed: {e}. Check TELEGRAM_CHANNEL env var.")
+        except Exception as e:
+            logger.error(f"Channel broadcast error: {e}")
+    else:
+        logger.warning("⚠️ TELEGRAM_CHANNEL not set — skipping channel broadcast")
+    
+    # ── 2. DM VIP users with priority picks ──
     sent_count = 0
-    failed_count = 0
-    
     for user_id, user_data in user_db.items():
         tier = user_data.get("tier", "free")
         
-        # Free users get a preview, subs get full details
-        if tier == "free":
-            # Send teaser to free users (drive upsell)
-            msg = (
-                f"🌅 Good morning! {len(predictions)} matches today.\n\n"
-                f"Preview (top 3):\n"
-            )
-            for pred in predictions[:3]:
-                msg += _format_short(pred)
-            msg += (
-                f"\n📊 Get all {len(predictions)} predictions + value bets!\n"
-                f"Upgrade: /subscribe"
-            )
-        else:
-            msg = header
-            limit = {"pro": 50, "vip": 200}.get(tier, 3)
-            for pred in predictions[:limit]:
-                msg += _format_short(pred)
-            
-            if tier == "vip":
-                msg += "\n\n💎 VIP: In-play alerts enabled for all matches."
+        if tier != "vip":
+            continue
         
         try:
+            vip_picks = "\n".join(
+                f"  ⚽ {p['home_team']} vs {p['away_team']} → "
+                f"{'🏠' if p.get('home_win_prob',0) > max(p.get('draw_prob',0), p.get('away_win_prob',0)) else '✈️' if p.get('away_win_prob',0) > p.get('draw_prob',0) else '🤝'} "
+                f"({max(p.get('home_win_prob',0), p.get('draw_prob',0), p.get('away_win_prob',0))*100:.0f}%)"
+                for p in predictions[:5]
+            )
+            
             await bot.send_message(
                 chat_id=user_id,
-                text=msg,
+                text=(
+                    f"👑 **VIP Morning Picks**\n\n"
+                    f"Full predictions in the channel:\n{CHANNEL_USERNAME or '@BettingBotPicks'}\n\n"
+                    f"_Top 5 picks:_\n{vip_picks}\n\n"
+                    f"💎 In-play alerts active."
+                ),
                 parse_mode="Markdown",
             )
             sent_count += 1
         except Forbidden:
-            logger.info(f"User {user_id} blocked the bot, skipping")
-            failed_count += 1
+            pass  # User blocked bot
         except Exception as e:
-            logger.error(f"Failed to send to {user_id}: {e}")
-            failed_count += 1
+            logger.error(f"Failed to DM VIP {user_id}: {e}")
         
-        # Rate limit: ~30 msgs/sec for bots
         await asyncio.sleep(0.05)
     
-    logger.info(f"Morning predictions sent: {sent_count} success, {failed_count} failed")
+    logger.info(f"Morning broadcast: channel={bool(CHANNEL_USERNAME)}, VIP DMs={sent_count}")
 
 
-def _format_short(pred: dict) -> str:
-    """Short format for morning digest."""
-    hw = pred.get("home_win_prob", 0)
-    dr = pred.get("draw_prob", 0)
-    aw = pred.get("away_win_prob", 0)
+def _format_channel_broadcast(predictions: List[dict]) -> str:
+    """Format predictions for channel broadcast (clean, public)."""
+    now = datetime.utcnow()
     
-    if hw > dr and hw > aw:
-        pick = f"🏠 {pred['home_team']}"
-        pct = hw
-    elif aw > dr:
-        pick = f"✈️ {pred['away_team']}"
-        pct = aw
-    else:
-        pick = "🤝 Draw"
-        pct = dr
-    
-    return (
-        f"  ⚽ {pred['home_team']} vs {pred['away_team']}\n"
-        f"    → {pick} ({pct*100:.0f}%) | "
-        f"O/U2.5: {'Over' if pred.get('over_under_25', 0) > 0.5 else 'Under'}\n"
+    msg = (
+        f"⚽ **Daily Football Predictions**\n"
+        f"📅 {now.strftime('%A, %B %d, %Y')}\n"
+        f"━━━━━━━━━━━━━━━━━━━━━━\n\n"
     )
+    
+    for i, pred in enumerate(predictions[:10], 1):
+        home = pred["home_team"]
+        away = pred["away_team"]
+        hw = pred.get("home_win_prob", 0)
+        dr = pred.get("draw_prob", 0)
+        aw = pred.get("away_win_prob", 0)
+        
+        if hw > dr and hw > aw:
+            pick, emoji = home, "🏠"
+            pct = hw
+        elif aw > dr:
+            pick, emoji = away, "✈️"
+            pct = aw
+        else:
+            pick, emoji = "Draw", "🤝"
+            pct = dr
+        
+        ou = "O2.5" if pred.get("over_under_25", 0) > 0.5 else "U2.5"
+        btts = "BTTS ✅" if pred.get("btts_prob", 0) > 0.5 else "BTTS ❌"
+        
+        msg += (
+            f"**{i}. {home} vs {away}**\n"
+            f"   {emoji} {pick} ({pct*100:.0f}%) | {ou} | {btts}\n\n"
+        )
+    
+    msg += (
+        f"━━━━━━━━━━━━━━━━━━━━━━\n"
+        f"📊 Dixon-Coles Poisson Model\n"
+        f"⚠️ For info only. Gamble responsibly.\n"
+        f"💎 Upgrade: DM @firm_bot_bettingbot → /subscribe"
+    )
+    
+    return msg
 
 
-async def _get_morning_predictions() -> list:
+async def _get_morning_predictions() -> List[dict]:
     """Fetch today's fixtures and run predictions."""
     from app.data.fetcher import DataManager
     from app.models.dixon_coles import DixonColesModel
-    import json
     
     dm = DataManager()
     fixtures = await dm.get_todays_predictions_data()
@@ -162,7 +183,7 @@ async def _get_morning_predictions() -> list:
                 "btts_prob": pred.btts_prob,
             })
     
-    # Sort by confidence (highest first)
+    # Sort by confidence
     predictions.sort(
         key=lambda p: max(p["home_win_prob"], p["draw_prob"], p["away_win_prob"]),
         reverse=True,
