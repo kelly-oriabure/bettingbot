@@ -85,6 +85,22 @@ async def send_morning_broadcast(bot_token: str):
             reverse=True,
         )
         
+        # If no matches, send a "no fixtures today" message
+        if not fixtures:
+            await bot.send_message(
+                chat_id=CHANNEL_ID,
+                text=(
+                    f"⚽ **Football Update**\n"
+                    f"📅 {datetime.utcnow().strftime('%A, %B %d, %Y')}\n\n"
+                    f"No matches scheduled for today. 🌴\n"
+                    f"Enjoy the break — back tomorrow with fresh fixtures!\n\n"
+                    f"💡 _Follow this channel for daily predictions and football updates._"
+                ),
+                parse_mode="Markdown",
+            )
+            logger.info("No matches today — sent 'no fixtures' message")
+            return
+        
         # 4. Build broadcast message
         broadcast = _build_morning_broadcast(predictions, fixtures)
         
