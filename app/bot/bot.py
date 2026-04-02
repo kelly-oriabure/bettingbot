@@ -451,8 +451,29 @@ def create_bot(token: str) -> Application:
     app.add_handler(CommandHandler("accuracy", accuracy_command))
     app.add_handler(CommandHandler("leagues", leagues_command))
     
-    logger.info("Bot created with all handlers")
+    # Schedule morning predictions at 5 AM UTC (6 AM Lagos time)
+    from apscheduler.schedulers.asyncio import AsyncIOScheduler
+    from apscheduler.triggers.cron import CronTrigger
+    scheduler = AsyncIOScheduler()
+    scheduler.add_job(
+        _send_morning_predictions,
+        trigger=CronTrigger(hour=5, minute=0, timezone="UTC"),
+        args=[app],
+        id="morning_predictions",
+        name="Morning Predictions",
+    )
+    scheduler.start()
+    logger.info("Bot created with all handlers + morning scheduler (5 AM UTC)")
     return app
+
+
+async def _send_morning_predictions(app: Application):
+    """Send morning predictions to all subscribed users."""
+    from app.scheduler import send_morning_predictions
+    try:
+        await send_morning_predictions(app.bot.token, USERS)
+    except Exception as e:
+        logger.error(f"Morning predictions failed: {e}", exc_info=True)
 
 
 async def post_init(app: Application):
