@@ -146,6 +146,7 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"• /predict Arsenal Chelsea — Predict specific match\n"
         f"• /value — Value bet alerts\n"
         f"• /subscribe — View plans & upgrade\n\n"
+        f"🔗 **Channel:** t.me/FirmBetting (daily predictions)\n\n"
         f"You're on the **Free** tier (3 predictions/day).\n"
         f"Upgrade to Pro for unlimited predictions!"
     )
@@ -318,6 +319,7 @@ async def subscribe_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"  • In-play predictions\n"
         f"  • Early morning alerts (6 AM)\n"
         f"  • Priority correct score picks\n\n"
+        f"🔗 Channel: t.me/FirmBetting\n\n"
         f"💳 To subscribe, contact @firmcloud\n"
         f"  Payment: Bank transfer / USDT / PayPal\n"
     )
