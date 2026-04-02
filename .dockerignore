@@ -1,0 +1,17 @@
+# Git
+.git
+.gitignore
+__pycache__
+*.pyc
+*.pyo
+.env
+.env.local
+venv/
+.venv/
+data/*.csv
+data/*.json
+!data/model.json
+!data/training_report.json
+tests/
+scripts/
+*.md

@@ -1,0 +1,10 @@
+# Docker Compose for local development
+version: "3.8"
+
+services:
+  bettingbot:
+    build: .
+    env_file: .env
+    volumes:
+      - ./data:/app/data  # Persist model data
+    restart: unless-stopped
