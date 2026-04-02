@@ -198,13 +198,7 @@ def _build_morning_broadcast(predictions: List[dict], fixtures: List[dict]) -> s
             )
     
     # Engagement hook
-    msg += (
-        f"\n━━━━━━━━━━━━━━━━━━━━━━\n"
-        f"📊 Dixon-Coles AI Model | Updated {now.strftime('%H:%M')} UTC\n"
-        f"💬 Reply with /predict TeamA TeamB for detailed analysis\n"
-        f"🔔 Subscribe for alerts: @firm_bot_bettingbot\n"
-        f"⚠️ For entertainment. Gamble responsibly.\n"
-    )
+    msg += f"\n━━━━━━━━━━━━━━━━━━━━━━\n"
     
     return msg
 
