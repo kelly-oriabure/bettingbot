@@ -520,3 +520,9 @@ async def post_init(app: Application):
         BotCommand("accuracy", "Bot accuracy stats"),
         BotCommand("help", "All commands"),
     ])
+
+
+async def post_shutdown(app: Application):
+    """Stop scheduler on shutdown."""
+    if hasattr(app, '_job_scheduler'):
+        app._job_scheduler.shutdown(wait=False)
