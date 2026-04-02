@@ -1,0 +1,20 @@
+{
+  "total_test_matches": 352,
+  "match_outcome_accuracy": 0.517,
+  "correct_score_accuracy": 0.679,
+  "over_under_accuracy": 0.6392,
+  "btts_accuracy": 0.6165,
+  "evaluated_at": "2026-04-02T05:16:13.070146",
+  "leagues": [
+    39,
+    140,
+    61,
+    135,
+    78
+  ],
+  "seasons": [
+    2024,
+    2025
+  ],
+  "total_matches": 1756
+}
