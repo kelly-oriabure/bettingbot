@@ -326,20 +326,32 @@ async def subscribe_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def accuracy_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle /accuracy — Show bot's historical performance."""
+    # Load actual training report if available
+    report_path = os.path.join(os.path.dirname(__file__), "..", "..", "data", "training_report.json")
+    try:
+        with open(report_path) as f:
+            report = json.load(f)
+        match_acc = report.get('match_outcome_accuracy', 0) * 100
+        ou_acc = report.get('over_under_accuracy', 0) * 100
+        btts_acc = report.get('btts_accuracy', 0) * 100
+        score_acc = report.get('correct_score_accuracy', 0) * 100
+        total = report.get('total_test_matches', 0)
+        trained_on = report.get('total_matches', 0)
+    except:
+        match_acc = ou_acc = btts_acc = score_acc = 0
+        total = trained_on = 0
+
     text = (
         "📊 **BettingBot Accuracy Stats**\n\n"
         "Models: Dixon-Coles Poisson + XGBoost Ensemble\n\n"
-        "**Backtest Results (EPL 2024/25):**\n"
-        "• Match Outcome: ~68% accuracy\n"
-        "• Over/Under 2.5: ~64% accuracy\n"
-        "• BTTS: ~62% accuracy\n"
-        "• Correct Score (exact): ~18%\n"
-        "• Correct Score (±1 goal): ~52%\n\n"
-        "**Value Betting ROI:**\n"
-        "• Pro users average: +4.2% ROI\n"
-        "  (based on value bet alerts)\n\n"
-        "_These are backtested results on historical data.\n"
-        "Past performance does not guarantee future results._\n"
+        f"**Backtest Results ({trained_on} matches trained, {total} tested):**\n"
+        f"• Match Outcome: **{match_acc:.1f}%** accuracy\n"
+        f"• Over/Under 2.5: **{ou_acc:.1f}%** accuracy\n"
+        f"• BTTS: **{btts_acc:.1f}%** accuracy\n"
+        f"• Correct Score (±1 goal): **{score_acc:.1f}%** accuracy\n\n"
+        "**Leagues:** EPL, La Liga, Serie A, Bundesliga, Ligue 1\n"
+        "**Seasons:** 2024/25, 2025/26\n\n"
+        "_Past performance does not guarantee future results._\n"
         "_Always gamble responsibly._"
     )
     await update.message.reply_text(text, parse_mode="Markdown")
