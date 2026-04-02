@@ -12,8 +12,9 @@ _env_path = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file
 if os.path.exists(_env_path):
     _env_vals = dotenv_values(_env_path)
     for _k, _v in _env_vals.items():
-        if _v and _k not in os.environ:
-            os.environ[_k] = _v
+        if _v:
+            if _k not in os.environ or not os.environ[_k]:
+                os.environ[_k] = _v
 
 logging.basicConfig(
     level=logging.INFO,
