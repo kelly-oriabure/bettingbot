@@ -93,16 +93,24 @@ async def send_morning_broadcast(bot_token: str):
             upcoming = await dm.odds_api.get_upcoming_matches(hours_ahead=168)  # 7 days
             
             if not upcoming:
+                # No fixtures this week — likely international break
                 await bot.send_message(
                     chat_id=CHANNEL_ID,
                     text=(
                         f"⚽ **Football Update**\n"
                         f"📅 {datetime.utcnow().strftime('%A, %B %d, %Y')}\n\n"
-                        f"No matches scheduled this week. 🌴\n"
-                        f"Enjoy the break — we'll be back with fresh fixtures!"
+                        f"🏟️ International break in effect — no league fixtures this week.\n\n"
+                        f"🌍 Here's what's happening:\n"
+                        f"  • International friendlies & qualifiers\n"
+                        f"  • Club training camps\n"
+                        f"  • Transfer window buzz ☕\n\n"
+                        f"📅 League action returns next week!\n"
+                        f"🔔 We'll be back with daily predictions as soon as fixtures resume.\n\n"
+                        f"_Follow us so you don't miss the comeback!_"
                     ),
                     parse_mode="Markdown",
                 )
+                logger.info("No fixtures this week — sent 'international break' message")
                 return
             
             # Group by date for timetable format
