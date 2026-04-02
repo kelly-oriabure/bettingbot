@@ -451,29 +451,50 @@ def create_bot(token: str) -> Application:
     app.add_handler(CommandHandler("accuracy", accuracy_command))
     app.add_handler(CommandHandler("leagues", leagues_command))
     
-    # Schedule morning predictions at 5 AM UTC (6 AM Lagos time)
+    # Schedule daily broadcasts
     from apscheduler.schedulers.asyncio import AsyncIOScheduler
     from apscheduler.triggers.cron import CronTrigger
     scheduler = AsyncIOScheduler()
+    
+    # Morning broadcast: 6 AM Lagos (5 AM UTC) — fixtures + predictions + news
     scheduler.add_job(
-        _send_morning_predictions,
+        _send_morning_broadcast,
         trigger=CronTrigger(hour=5, minute=0, timezone="UTC"),
         args=[app],
-        id="morning_predictions",
-        name="Morning Predictions",
+        id="morning_broadcast",
+        name="Morning Broadcast",
     )
+    
+    # Evening recap: 10 PM Lagos (9 PM UTC) — results + performance
+    scheduler.add_job(
+        _send_evening_recap,
+        trigger=CronTrigger(hour=21, minute=0, timezone="UTC"),
+        args=[app],
+        id="evening_recap",
+        name="Evening Recap",
+    )
+    
     scheduler.start()
-    logger.info("Bot created with all handlers + morning scheduler (5 AM UTC)")
+    logger.info("Bot created with all handlers + daily scheduler (morning 5 AM UTC, evening 9 PM UTC)")
     return app
 
 
-async def _send_morning_predictions(app: Application):
-    """Send morning predictions to all subscribed users."""
-    from app.scheduler import send_morning_predictions
+async def _send_morning_broadcast(app: Application):
+    """Send morning broadcast to channel."""
+    from app.scheduler import send_morning_broadcast
     try:
-        await send_morning_predictions(app.bot.token, USERS)
+        await send_morning_broadcast(app.bot.token)
     except Exception as e:
-        logger.error(f"Morning predictions failed: {e}", exc_info=True)
+        logger.error(f"Morning broadcast failed: {e}", exc_info=True)
+
+
+async def _send_evening_recap(app: Application):
+    """Send evening recap to channel."""
+    from app.scheduler import send_evening_recap
+    try:
+        await send_evening_recap(app.bot.token)
+    except Exception as e:
+        logger.error(f"Evening recap failed: {e}", exc_info=True)
 
 
 async def post_init(app: Application):
