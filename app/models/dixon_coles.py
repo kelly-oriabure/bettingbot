@@ -81,43 +81,47 @@ class DixonColesModel:
         self, params: np.ndarray, data: pd.DataFrame,
         teams: List[str], rho: float
     ) -> float:
-        """Calculate log-likelihood for all matches."""
+        """Calculate log-likelihood for all matches (vectorized)."""
         team_idx = {t: i for i, t in enumerate(teams)}
         n = len(teams)
         
-        # Unpack params: attack(0..n-1), defense(n..2n-1), home_adv(n)
         attack = params[:n]
         defense = params[n:2*n]
         home_adv = params[2*n]
         
-        log_likelihood = 0.0
+        # Vectorized lookup
+        home_idx = np.array([team_idx[t] for t in data['home_team']], dtype=np.int32)
+        away_idx = np.array([team_idx[t] for t in data['away_team']], dtype=np.int32)
+        hg = data['home_goals'].values.astype(np.float64)
+        ag = data['away_goals'].values.astype(np.float64)
         
-        for _, row in data.iterrows():
-            home = team_idx[row['home_team']]
-            away = team_idx[row['away_team']]
-            hg = int(row['home_goals'])
-            ag = int(row['away_goals'])
-            
-            # Expected goals
-            lambda_ = np.exp(attack[home] + defense[away] + home_adv)
-            mu = np.exp(attack[away] + defense[home])
-            
-            # Clamp for numerical stability
-            lambda_ = max(lambda_, 0.01)
-            mu = max(mu, 0.01)
-            
-            # Poisson log-likelihood with Dixon-Coles correction
-            tau = self._tau(hg, ag, lambda_, mu, rho)
-            if tau <= 0:
-                tau = 1e-10
-            
-            log_likelihood += (
-                np.log(tau)
-                + poisson.logpmf(hg, lambda_)
-                + poisson.logpmf(ag, mu)
-            )
+        # Expected goals (vectorized)
+        lambda_ = np.exp(attack[home_idx] + defense[away_idx] + home_adv)
+        mu = np.exp(attack[away_idx] + defense[home_idx])
         
-        return -log_likelihood  # negative for minimization
+        # Clamp for numerical stability
+        lambda_ = np.maximum(lambda_, 0.01)
+        mu = np.maximum(mu, 0.01)
+        
+        # Poisson log-likelihood (vectorized)
+        log_lik = poisson.logpmf(hg, lambda_) + poisson.logpmf(ag, mu)
+        
+        # Dixon-Coles tau correction (vectorized)
+        tau = np.ones_like(log_lik)
+        mask_00 = (hg == 0) & (ag == 0)
+        mask_10 = (hg == 1) & (ag == 0)
+        mask_01 = (hg == 0) & (ag == 1)
+        mask_11 = (hg == 1) & (ag == 1)
+        
+        tau[mask_00] = 1 - lambda_[mask_00] * mu[mask_00] * rho
+        tau[mask_10] = 1 + lambda_[mask_10] * rho
+        tau[mask_01] = 1 + mu[mask_01] * rho
+        tau[mask_11] = 1 - rho
+        
+        tau = np.maximum(tau, 1e-10)
+        log_lik += np.log(tau)
+        
+        return -np.sum(log_lik)
 
     def fit(self, data: pd.DataFrame, rho_init: float = -0.13) -> None:
         """
@@ -145,7 +149,7 @@ class DixonColesModel:
             args=(data, self.teams, rho_init),
             method='L-BFGS-B',
             bounds=bounds,
-            options={'maxiter': 1000, 'ftol': 1e-8}
+            options={'maxiter': 300, 'ftol': 1e-6}
         )
         
         if not result.success:
