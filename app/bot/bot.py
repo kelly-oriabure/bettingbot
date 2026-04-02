@@ -437,9 +437,14 @@ async def _run_prediction(
 
 # ─── Bot Setup ─────────────────────────────────────────────────
 
-def create_bot(token: str) -> Application:
+def create_bot(token: str, post_init=None, post_shutdown=None) -> Application:
     """Create and configure the Telegram bot application."""
-    app = Application.builder().token(token).build()
+    builder = Application.builder().token(token)
+    if post_init:
+        builder = builder.post_init(post_init)
+    if post_shutdown:
+        builder = builder.post_shutdown(post_shutdown)
+    app = builder.build()
     
     # Register commands
     app.add_handler(CommandHandler("start", start_command))
@@ -456,7 +461,7 @@ def create_bot(token: str) -> Application:
     from apscheduler.triggers.cron import CronTrigger
     scheduler = AsyncIOScheduler()
     
-    # Morning broadcast: 6 AM Lagos (5 AM UTC) — fixtures + predictions + news
+    # Morning broadcast: 6 AM Lagos (5 AM UTC)
     scheduler.add_job(
         _send_morning_broadcast,
         trigger=CronTrigger(hour=5, minute=0, timezone="UTC"),
@@ -465,7 +470,7 @@ def create_bot(token: str) -> Application:
         name="Morning Broadcast",
     )
     
-    # Evening recap: 10 PM Lagos (9 PM UTC) — results + performance
+    # Evening recap: 10 PM Lagos (9 PM UTC)
     scheduler.add_job(
         _send_evening_recap,
         trigger=CronTrigger(hour=21, minute=0, timezone="UTC"),
@@ -474,7 +479,8 @@ def create_bot(token: str) -> Application:
         name="Evening Recap",
     )
     
-    scheduler.start()
+    # Store scheduler — start it in post_init when event loop is running
+    app._job_scheduler = scheduler
     logger.info("Bot created with all handlers + daily scheduler (morning 5 AM UTC, evening 9 PM UTC)")
     return app
 
@@ -498,7 +504,12 @@ async def _send_evening_recap(app: Application):
 
 
 async def post_init(app: Application):
-    """Post-initialization: set bot commands menu."""
+    """Start scheduler after event loop is running, set bot commands."""
+    # Start the scheduler
+    if hasattr(app, '_job_scheduler'):
+        app._job_scheduler.start()
+        logger.info("✅ APScheduler started")
+    
     await app.bot.set_my_commands([
         BotCommand("start", "Welcome message"),
         BotCommand("today", "Today's predictions"),
@@ -508,4 +519,5 @@ async def post_init(app: Application):
         BotCommand("subscribe", "Subscription plans"),
         BotCommand("accuracy", "Bot accuracy stats"),
         BotCommand("help", "All commands"),
+    ])
     ])

@@ -25,7 +25,7 @@ logger = logging.getLogger("bettingbot")
 
 def main():
     import asyncio
-    from app.bot.bot import create_bot
+    from app.bot.bot import create_bot, post_init, post_shutdown
     from app.bot.health import start_health_server, set_bot_running
 
     token = os.environ.get("TELEGRAM_BOT_TOKEN")
@@ -38,7 +38,7 @@ def main():
     asyncio.set_event_loop(loop)
     loop.run_until_complete(start_health_server(8080))
 
-    bot_app = create_bot(token)
+    bot_app = create_bot(token, post_init=post_init, post_shutdown=post_shutdown)
     set_bot_running(True)
     logger.info("Starting BettingBot with health server...")
     bot_app.run_polling(drop_pending_updates=True)
