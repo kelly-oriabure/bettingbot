@@ -85,20 +85,76 @@ async def send_morning_broadcast(bot_token: str):
             reverse=True,
         )
         
-        # If no matches, send a "no fixtures today" message
+        # If no matches today, get the week's fixtures
         if not fixtures:
+            logger.info("No matches today — fetching week's fixtures")
+            
+            # Fetch matches for the next 7 days
+            upcoming = await dm.odds_api.get_upcoming_matches(hours_ahead=168)  # 7 days
+            
+            if not upcoming:
+                await bot.send_message(
+                    chat_id=CHANNEL_ID,
+                    text=(
+                        f"⚽ **Football Update**\n"
+                        f"📅 {datetime.utcnow().strftime('%A, %B %d, %Y')}\n\n"
+                        f"No matches scheduled this week. 🌴\n"
+                        f"Enjoy the break — we'll be back with fresh fixtures!"
+                    ),
+                    parse_mode="Markdown",
+                )
+                return
+            
+            # Group by date for timetable format
+            by_date = {}
+            for m in upcoming:
+                try:
+                    dt = datetime.fromisoformat(m["date"].replace("Z", "+00:00"))
+                    date_key = dt.strftime("%A %b %d")
+                    if date_key not in by_date:
+                        by_date[date_key] = []
+                    by_date[date_key].append(m)
+                except:
+                    pass
+            
+            msg = (
+                f"⚽ **Weekly Fixture Schedule**\n"
+                f"📅 Starting {datetime.utcnow().strftime('%A, %B %d')}\n"
+                f"━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            )
+            
+            for date_key, matches in list(by_date.items())[:7]:
+                # Convert to Lagos time (+1)
+                first_match = matches[0]
+                try:
+                    dt = datetime.fromisoformat(first_match["date"].replace("Z", "+00:00"))
+                    time_str = (dt + timedelta(hours=1)).strftime("%H:%M")
+                except:
+                    time_str = "TBD"
+                
+                msg += f"📅 **{date_key}**\n"
+                for m in matches[:8]:
+                    try:
+                        dt = datetime.fromisoformat(m["date"].replace("Z", "+00:00"))
+                        t = (dt + timedelta(hours=1)).strftime("%H:%M")
+                    except:
+                        t = "TBD"
+                    msg += f"  {t}  {m['home_team']} vs {m['away_team']}\n"
+                if len(matches) > 8:
+                    msg += f"  ... +{len(matches)-8} more\n"
+                msg += "\n"
+            
+            msg += (
+                f"━━━━━━━━━━━━━━━━━━━━━━\n"
+                f"Follow for daily predictions when fixtures return! ⚡"
+            )
+            
             await bot.send_message(
                 chat_id=CHANNEL_ID,
-                text=(
-                    f"⚽ **Football Update**\n"
-                    f"📅 {datetime.utcnow().strftime('%A, %B %d, %Y')}\n\n"
-                    f"No matches scheduled for today. 🌴\n"
-                    f"Enjoy the break — back tomorrow with fresh fixtures!\n\n"
-                    f"💡 _Follow this channel for daily predictions and football updates._"
-                ),
+                text=msg,
                 parse_mode="Markdown",
             )
-            logger.info("No matches today — sent 'no fixtures' message")
+            logger.info(f"Weekly fixture timetable sent: {len(upcoming)} matches across {len(by_date)} days")
             return
         
         # 4. Build broadcast message
