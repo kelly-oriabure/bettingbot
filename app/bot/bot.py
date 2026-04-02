@@ -520,4 +520,3 @@ async def post_init(app: Application):
         BotCommand("accuracy", "Bot accuracy stats"),
         BotCommand("help", "All commands"),
     ])
-    ])
