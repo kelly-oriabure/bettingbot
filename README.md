@@ -71,3 +71,4 @@ Push to GitHub → Coolify auto-deploys via Dockerfile.
 
 ## License
 Proprietary - Firmcloud LTD
+# Trigger deploy Thu Apr  2 03:30:51 UTC 2026
