@@ -26,6 +26,30 @@ from telegram.error import BadRequest
 logger = logging.getLogger(__name__)
 
 CHANNEL_ID = os.environ.get("TELEGRAM_CHANNEL", "")
+_STATE_FILE = os.path.join(os.path.dirname(__file__), "..", "data", "broadcast_state.json")
+
+
+def _get_last_broadcast_date() -> str:
+    """Get the date of the last successful broadcast."""
+    try:
+        if os.path.exists(_STATE_FILE):
+            import json
+            with open(_STATE_FILE) as f:
+                return json.load(f).get("last_broadcast", "")
+    except Exception:
+        pass
+    return ""
+
+
+def _set_last_broadcast_date(date_str: str):
+    """Record the date of a successful broadcast."""
+    try:
+        import json
+        os.makedirs(os.path.dirname(_STATE_FILE), exist_ok=True)
+        with open(_STATE_FILE, "w") as f:
+            json.dump({"last_broadcast": date_str}, f)
+    except Exception:
+        pass
 
 
 async def send_morning_broadcast(bot_token: str):
@@ -176,6 +200,7 @@ async def send_morning_broadcast(bot_token: str):
         )
         
         logger.info(f"✅ Morning broadcast sent: {len(predictions)} predictions, {len(fixtures)} fixtures")
+        _set_last_broadcast_date(datetime.utcnow().strftime("%Y-%m-%d"))
         
         # 6. If there are many fixtures, send a second message with all fixtures
         if len(fixtures) > 10:
@@ -415,6 +440,7 @@ async def send_evening_recap(bot_token: str):
         )
         
         logger.info(f"✅ Evening recap sent: {len(completed)} results")
+        _set_last_broadcast_date(datetime.utcnow().strftime("%Y-%m-%d_evening"))
         
     except Exception as e:
         logger.error(f"Evening recap failed: {e}", exc_info=True)

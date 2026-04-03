@@ -522,6 +522,27 @@ async def post_init(app: Application):
         BotCommand("accuracy", "Bot accuracy stats"),
         BotCommand("help", "All commands"),
     ])
+    
+    # Catch up missed broadcasts (e.g., after server restart)
+    try:
+        from datetime import datetime
+        from app.scheduler import _get_last_broadcast_date, send_morning_broadcast, send_evening_recap
+        now = datetime.utcnow()
+        last_date = _get_last_broadcast_date()
+        today_str = now.strftime("%Y-%m-%d")
+        
+        if now.hour >= 5 and last_date < today_str:
+            logger.info("⏰ Missed morning broadcast — sending now")
+            await send_morning_broadcast(app.bot.token)
+            from app.scheduler import _set_last_broadcast_date
+            _set_last_broadcast_date(today_str)
+        
+        if now.hour >= 21 and last_date < f"{today_str}_evening":
+            logger.info("⏰ Missed evening recap — sending now")
+            await send_evening_recap(app.bot.token)
+            _set_last_broadcast_date(f"{today_str}_evening")
+    except Exception as e:
+        logger.warning(f"Missed broadcast check failed: {e}")
 
 
 async def post_shutdown(app: Application):
