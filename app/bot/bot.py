@@ -127,8 +127,23 @@ def format_prediction(pred: Dict) -> str:
 
 # ─── Command Handlers ─────────────────────────────────────────
 
+async def _require_private(update: Update) -> bool:
+    """If command used in group/channel, reply with DM instruction and return True."""
+    chat = update.effective_chat
+    if chat.type != "private":
+        await update.message.reply_text(
+            "📩 For predictions, chat with me directly:\n"
+            f"t.me/{(await update.get_bot()).username}\n\n"
+            "This channel is for broadcasts only."
+        )
+        return True
+    return False
+
+
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle /start command."""
+    if await _require_private(update):
+        return
     user = update.effective_user
     get_user(user.id)
     
@@ -154,6 +169,8 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if await _require_private(update):
+        return
     """Handle /help command."""
     text = (
         "🤖 **BettingBot Commands**\n\n"
@@ -173,6 +190,8 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def today_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if await _require_private(update):
+        return
     """Handle /today — Show today's predictions."""
     user = get_user(update.effective_user.id)
     limit = TIERS[user["tier"]]["daily_limit"]
@@ -227,6 +246,8 @@ async def today_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def predict_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if await _require_private(update):
+        return
     """Handle /predict <team1> <team2>."""
     user = get_user(update.effective_user.id)
     
@@ -271,6 +292,8 @@ async def predict_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def value_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if await _require_private(update):
+        return
     """Handle /value — Show value bet opportunities."""
     user = get_user(update.effective_user.id)
     
@@ -297,6 +320,8 @@ async def value_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def subscribe_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if await _require_private(update):
+        return
     """Handle /subscribe — Show subscription plans."""
     user = get_user(update.effective_user.id)
     current = user["tier"].upper()
@@ -327,6 +352,8 @@ async def subscribe_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def accuracy_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if await _require_private(update):
+        return
     """Handle /accuracy — Show bot's historical performance."""
     # Load actual training report if available
     report_path = os.path.join(os.path.dirname(__file__), "..", "..", "data", "training_report.json")
@@ -360,6 +387,8 @@ async def accuracy_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def leagues_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if await _require_private(update):
+        return
     """Handle /leagues — List supported leagues."""
     from app.data.fetcher import LEAGUE_IDS
     
