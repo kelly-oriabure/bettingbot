@@ -109,35 +109,54 @@ async def send_morning_broadcast(bot_token: str):
             reverse=True,
         )
         
-        # If no matches today, get the week's fixtures
+        # If no matches today, get the week's fixtures WITH predictions
         if not fixtures:
-            logger.info("No matches today — fetching week's fixtures")
+            logger.info("No matches today — fetching week's fixtures with predictions")
             
             # Fetch matches for the next 7 days
-            upcoming = await dm.odds_api.get_upcoming_matches(hours_ahead=168)  # 7 days
+            upcoming = await dm.odds_api.get_upcoming_matches(hours_ahead=168)
             
             if not upcoming:
-                # No fixtures this week — likely international break
                 await bot.send_message(
                     chat_id=CHANNEL_ID,
                     text=(
                         f"⚽ **Football Update**\n"
                         f"📅 {datetime.utcnow().strftime('%A, %B %d, %Y')}\n\n"
                         f"🏟️ International break in effect — no league fixtures this week.\n\n"
-                        f"🌍 Here's what's happening:\n"
-                        f"  • International friendlies & qualifiers\n"
-                        f"  • Club training camps\n"
-                        f"  • Transfer window buzz ☕\n\n"
                         f"📅 League action returns next week!\n"
-                        f"🔔 We'll be back with daily predictions as soon as fixtures resume.\n\n"
-                        f"_Follow us so you don't miss the comeback!_"
+                        f"🔔 We'll be back with daily predictions as soon as fixtures resume."
                     ),
                     parse_mode="Markdown",
                 )
-                logger.info("No fixtures this week — sent 'international break' message")
                 return
             
-            # Group by date for timetable format
+            # Run predictions on upcoming fixtures
+            upcoming_preds = []
+            if model and model.fitted:
+                for fixture in upcoming:
+                    pred = model.predict_match(fixture["home_team"], fixture["away_team"])
+                    if pred:
+                        upcoming_preds.append({
+                            "home_team": pred.home_team,
+                            "away_team": pred.away_team,
+                            "home_win_prob": pred.home_win_prob,
+                            "draw_prob": pred.draw_prob,
+                            "away_win_prob": pred.away_win_prob,
+                            "expected_home_goals": pred.expected_home_goals,
+                            "expected_away_goals": pred.expected_away_goals,
+                            "over_under_25": pred.over_under_25,
+                            "btts_prob": pred.btts_prob,
+                            "confidence": pred.confidence,
+                            "date": fixture["date"],
+                            "league_name": fixture.get("league_name", ""),
+                        })
+            
+            upcoming_preds.sort(
+                key=lambda p: max(p["home_win_prob"], p["draw_prob"], p["away_win_prob"]),
+                reverse=True,
+            )
+            
+            # Group by date for broadcast
             by_date = {}
             for m in upcoming:
                 try:
@@ -149,44 +168,76 @@ async def send_morning_broadcast(bot_token: str):
                 except:
                     pass
             
+            # Build broadcast with predictions
+            now = datetime.utcnow()
             msg = (
-                f"⚽ **Weekly Fixture Schedule**\n"
-                f"📅 Starting {datetime.utcnow().strftime('%A, %B %d')}\n"
+                f"⚽ **Upcoming Predictions**\n"
+                f"📅 {now.strftime('%A, %B %d, %Y')}\n"
                 f"━━━━━━━━━━━━━━━━━━━━━━\n\n"
+                f"🏟️ No league matches today — here are the next fixtures with predictions!\n\n"
             )
             
+            # Top 5 hot picks
+            if upcoming_preds:
+                msg += "🔥 **Top Picks This Week**\n\n"
+                for i, pred in enumerate(upcoming_preds[:5], 1):
+                    hw = pred["home_win_prob"]
+                    dr = pred["draw_prob"]
+                    aw = pred["away_win_prob"]
+                    conf = pred.get("confidence", "medium")
+                    conf_emoji = {"high": "🟢", "medium": "🟡", "low": "⚪"}.get(conf, "🟡")
+                    
+                    if hw > dr and hw > aw:
+                        pick = f"🏠 {pred['home_team']}"
+                        pct = hw
+                    elif aw > dr:
+                        pick = f"✈️ {pred['away_team']}"
+                        pct = aw
+                    else:
+                        pick = "🤝 Draw"
+                        pct = dr
+                    
+                    ou = "Over 2.5" if pred.get("over_under_25", 0) > 0.5 else "Under 2.5"
+                    btts = "BTTS ✅" if pred.get("btts_prob", 0) > 0.5 else "BTTS ❌"
+                    
+                    try:
+                        dt = datetime.fromisoformat(pred["date"].replace("Z", "+00:00"))
+                        date_str = (dt + timedelta(hours=1)).strftime("%a %b %d")
+                    except:
+                        date_str = "TBD"
+                    
+                    msg += (
+                        f"**{i}. {pred['home_team']} vs {pred['away_team']}** ({date_str})\n"
+                        f"   {conf_emoji} {pick} ({pct*100:.0f}%) | {ou} | {btts}\n\n"
+                    )
+            
+            # Fixture schedule (compact)
+            msg += "📅 **Full Schedule**\n\n"
             for date_key, matches in list(by_date.items())[:7]:
-                # Convert to Lagos time (+1)
-                first_match = matches[0]
                 try:
-                    dt = datetime.fromisoformat(first_match["date"].replace("Z", "+00:00"))
+                    dt = datetime.fromisoformat(matches[0]["date"].replace("Z", "+00:00"))
                     time_str = (dt + timedelta(hours=1)).strftime("%H:%M")
                 except:
                     time_str = "TBD"
                 
-                msg += f"📅 **{date_key}**\n"
-                for m in matches[:8]:
+                msg += f"**{date_key}**\n"
+                for m in matches[:5]:
                     try:
                         dt = datetime.fromisoformat(m["date"].replace("Z", "+00:00"))
                         t = (dt + timedelta(hours=1)).strftime("%H:%M")
                     except:
                         t = "TBD"
                     msg += f"  {t}  {m['home_team']} vs {m['away_team']}\n"
-                if len(matches) > 8:
-                    msg += f"  ... +{len(matches)-8} more\n"
+                if len(matches) > 5:
+                    msg += f"  ... +{len(matches)-5} more\n"
                 msg += "\n"
-            
-            msg += (
-                f"━━━━━━━━━━━━━━━━━━━━━━\n"
-                f"Follow for daily predictions when fixtures return! ⚡"
-            )
             
             await bot.send_message(
                 chat_id=CHANNEL_ID,
                 text=msg,
                 parse_mode="Markdown",
             )
-            logger.info(f"Weekly fixture timetable sent: {len(upcoming)} matches across {len(by_date)} days")
+            logger.info(f"Upcoming predictions sent: {len(upcoming)} matches, {len(upcoming_preds)} predictions")
             return
         
         # 4. Build broadcast message
