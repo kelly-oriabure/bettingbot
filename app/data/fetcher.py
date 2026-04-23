@@ -223,11 +223,83 @@ class OddsApiClient:
 
 
 class FootballDataClient:
-    """API-Football client — training data only (free plan lacks current season)."""
+    """API-Football client — fixtures, odds, and training data."""
     
     def __init__(self, api_key: Optional[str] = None):
         self.api_key = api_key or os.environ.get("API_FOOTBALL_KEY", "")
         self.headers = {"x-apisports-key": self.api_key}
+    
+    async def get_upcoming_fixtures(self, league_ids: List[int] = None, hours_ahead: int = 48) -> List[Dict]:
+        """Get upcoming fixtures from API-Football."""
+        leagues = league_ids or [39, 140, 61, 135, 78, 848]  # EPL, La Liga, Ligue 1, Bundesliga, Serie A, Brasileirao
+        all_fixtures = []
+        
+        async with aiohttp.ClientSession() as session:
+            for league_id in leagues:
+                try:
+                    async with session.get(
+                        f"{API_FOOTBALL_BASE}/fixtures",
+                        headers=self.headers,
+                        params={"league": league_id, "next": 20}
+                    ) as resp:
+                        if resp.status != 200:
+                            logger.warning(f"API-Football fixtures error for league {league_id}: {resp.status}")
+                            continue
+                        data = await resp.json()
+                        
+                        for f in data.get("response", []):
+                            all_fixtures.append({
+                                "fixture_id": f["fixture"]["id"],
+                                "home_team": normalize_team_name(f["teams"]["home"]["name"]),
+                                "away_team": normalize_team_name(f["teams"]["away"]["name"]),
+                                "date": f["fixture"]["date"],
+                                "league_name": f["league"]["name"],
+                                "league_id": f["league"]["id"],
+                                "status": f["fixture"]["status"]["short"],
+                            })
+                    await asyncio.sleep(0.3)
+                except Exception as e:
+                    logger.debug(f"API-Football error (league {league_id}): {e}")
+        
+        logger.info(f"API-Football: {len(all_fixtures)} upcoming fixtures")
+        return all_fixtures
+    
+    async def get_odds(self, fixture_id: int) -> Optional[Dict]:
+        """Get odds for a specific fixture from API-Football."""
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(
+                    f"{API_FOOTBALL_BASE}/odds",
+                    headers=self.headers,
+                    params={"fixture": fixture_id}
+                ) as resp:
+                    if resp.status != 200:
+                        return None
+                    data = await resp.json()
+                    if not data.get("response"):
+                        return None
+                    
+                    odds_data = data["response"][0]
+                    result = {"home_implied_prob": 0, "draw_implied_prob": 0, "away_implied_prob": 0, "over_25": 0}
+                    
+                    for bookmaker in odds_data.get("bookmakers", []):
+                        for bet in bookmaker.get("bets", []):
+                            if bet["name"] == "Match Winner":
+                                for outcome in bet.get("values", []):
+                                    if outcome["value"] == "Home":
+                                        result["home_implied_prob"] = 1 / float(outcome["odd"])
+                                    elif outcome["value"] == "Draw":
+                                        result["draw_implied_prob"] = 1 / float(outcome["odd"])
+                                    elif outcome["value"] == "Away":
+                                        result["away_implied_prob"] = 1 / float(outcome["odd"])
+                            elif bet["name"] == "Over/Under 2.5":
+                                for outcome in bet.get("values", []):
+                                    if outcome["value"] == "Over":
+                                        result["over_25"] = float(outcome["odd"])
+                    return result
+        except Exception as e:
+            logger.debug(f"API-Football odds error (fixture {fixture_id}): {e}")
+            return None
     
     async def get_historical_results(self, league_id: int, season: int) -> pd.DataFrame:
         async with aiohttp.ClientSession() as session:
@@ -276,31 +348,58 @@ class FootballDataClient:
 
 
 class DataManager:
-    """Main data manager — combines both APIs."""
+    """Main data manager — uses API-Football for fixtures and odds."""
     
     def __init__(self):
-        self.odds_api = OddsApiClient()
         self.api_football = FootballDataClient()
     
     async def get_todays_predictions_data(self) -> List[Dict]:
         """Get today's fixtures with odds for prediction."""
-        upcoming = await self.odds_api.get_upcoming_matches(hours_ahead=24)
+        fixtures = await self.api_football.get_upcoming_fixtures()
         
-        if not upcoming:
-            logger.info("No upcoming matches from Odds API")
+        if not fixtures:
+            logger.info("No upcoming fixtures from API-Football")
             return []
         
         # Filter to matches within next 24 hours
         now = datetime.utcnow()
         today_matches = []
-        for m in upcoming:
+        for m in fixtures:
             try:
                 match_time = datetime.fromisoformat(m["date"].replace("Z", "+00:00"))
                 if now <= match_time <= now + timedelta(hours=24):
-                    m["odds"] = self.odds_api.extract_odds(m)
-                    today_matches.append(m)
-            except:
-                pass
+                    # Get odds for this fixture
+                    odds = await self.api_football.get_odds(m["fixture_id"])
+                    if odds:
+                        m["odds"] = odds
+                        today_matches.append(m)
+            except Exception as e:
+                logger.debug(f"Error processing fixture: {e}")
         
-        logger.info(f"Today's matches: {len(today_matches)}")
+        logger.info(f"Today's matches with odds: {len(today_matches)}")
         return today_matches
+    
+    async def get_upcoming_matches(self, hours_ahead: int = 168) -> List[Dict]:
+        """Get upcoming matches for the next N hours."""
+        fixtures = await self.api_football.get_upcoming_fixtures()
+        
+        if not fixtures:
+            logger.info("No upcoming fixtures from API-Football")
+            return []
+        
+        now = datetime.utcnow()
+        upcoming_matches = []
+        for m in fixtures:
+            try:
+                match_time = datetime.fromisoformat(m["date"].replace("Z", "+00:00"))
+                if now <= match_time <= now + timedelta(hours=hours_ahead):
+                    # Get odds for this fixture
+                    odds = await self.api_football.get_odds(m["fixture_id"])
+                    if odds:
+                        m["odds"] = odds
+                    upcoming_matches.append(m)
+            except Exception as e:
+                logger.debug(f"Error processing fixture: {e}")
+        
+        logger.info(f"Upcoming matches: {len(upcoming_matches)}")
+        return upcoming_matches

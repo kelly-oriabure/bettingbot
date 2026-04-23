@@ -114,7 +114,7 @@ async def send_morning_broadcast(bot_token: str):
             logger.info("No matches today — fetching week's fixtures with predictions")
             
             # Fetch matches for the next 7 days
-            upcoming = await dm.odds_api.get_upcoming_matches(hours_ahead=168)
+            upcoming = await dm.get_upcoming_matches(hours_ahead=168)
             
             if not upcoming:
                 await bot.send_message(
