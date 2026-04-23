@@ -531,7 +531,10 @@ class DataManager:
         today_matches = []
         for m in upcoming:
             try:
-                match_time = datetime.fromisoformat(m["date"].replace("Z", "+00:00"))
+                date_str = m.get("date", "").replace("Z", "+00:00")
+                if "+" not in date_str[-6:] and "-" not in date_str[-6:]:
+                    date_str += "+00:00"
+                match_time = datetime.fromisoformat(date_str)
                 if now <= match_time <= now + timedelta(hours=24):
                     m["odds"] = self.odds_provider.extract_odds(m)
                     today_matches.append(m)
@@ -551,14 +554,35 @@ class DataManager:
         
         now = datetime.utcnow()
         upcoming_matches = []
+        parse_errors = 0
+        
         for m in upcoming:
             try:
-                match_time = datetime.fromisoformat(m["date"].replace("Z", "+00:00"))
+                date_str = m.get("date", "")
+                if not date_str:
+                    continue
+                # Handle various ISO formats
+                date_str = date_str.replace("Z", "+00:00")
+                if "+" not in date_str[-6:] and "-" not in date_str[-6:]:
+                    date_str += "+00:00"
+                match_time = datetime.fromisoformat(date_str)
+                
                 if now <= match_time <= now + timedelta(hours=hours_ahead):
                     m["odds"] = self.odds_provider.extract_odds(m)
                     upcoming_matches.append(m)
             except Exception as e:
-                logger.debug(f"Error processing fixture: {e}")
+                parse_errors += 1
+                logger.debug(f"Error processing fixture ({m.get('home_team', '?')} vs {m.get('away_team', '?')}): {e}")
         
-        logger.info(f"Upcoming matches: {len(upcoming_matches)}")
+        if parse_errors > 0:
+            logger.warning(f"Failed to parse {parse_errors} fixture dates")
+        
+        # Fallback: if time filtering removed ALL matches, return all upcoming
+        if len(upcoming_matches) == 0 and len(upcoming) > 0:
+            logger.warning(f"Time filtering removed all {len(upcoming)} matches — using all available")
+            for m in upcoming:
+                m["odds"] = self.odds_provider.extract_odds(m)
+                upcoming_matches.append(m)
+        
+        logger.info(f"Upcoming matches: {len(upcoming_matches)} (from {len(upcoming)} total)")
         return upcoming_matches
