@@ -133,8 +133,16 @@ async def send_morning_broadcast(bot_token: str):
             # Run predictions on upcoming fixtures
             upcoming_preds = []
             if model and model.fitted:
+                logger.info(f"Model loaded: {len(model.teams)} teams, predicting {len(upcoming)} fixtures")
+                logger.debug(f"Model teams: {sorted(model.teams)[:10]}...")
                 for fixture in upcoming:
-                    pred = model.predict_match(fixture["home_team"], fixture["away_team"])
+                    home = fixture["home_team"]
+                    away = fixture["away_team"]
+                    home_ok = home in model.teams
+                    away_ok = away in model.teams
+                    if not home_ok or not away_ok:
+                        logger.debug(f"Skip {home} vs {away}: home={home_ok}, away={away_ok}")
+                    pred = model.predict_match(home, away)
                     if pred:
                         upcoming_preds.append({
                             "home_team": pred.home_team,
