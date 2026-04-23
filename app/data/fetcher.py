@@ -33,13 +33,14 @@ ODDS_API_LEAGUES = {
     "soccer_italy_serie_a": "Serie A",
     "soccer_germany_bundesliga": "Bundesliga",
     "soccer_france_ligue_one": "Ligue 1",
-    "soccer_uefa_champs_league": "Champions League",
-    "soccer_netherlands_eredivisie": "Eredivisie",
-    "soccer_portugal_primeira_liga": "Primeira Liga",
-    "soccer_turkey_super_league": "Turkish Super League",
-    "soccer_brazil_campeonato": "Brasileirao",
-    "soccer_china_superleague": "Chinese Super League",
-    "soccer_scotland_premiership": "Scottish Premiership",
+    # Champions League, Eredivisie, etc. commented out to save credits
+    # "soccer_uefa_champs_league": "Champions League",
+    # "soccer_netherlands_eredivisie": "Eredivisie",
+    # "soccer_portugal_primeira_liga": "Primeira Liga",
+    # "soccer_turkey_super_league": "Turkish Super League",
+    # "soccer_brazil_campeonato": "Brasileirao",
+    # "soccer_china_superleague": "Chinese Super League",
+    # "soccer_spl": "Scottish Premiership",
 }
 
 LEAGUE_IDS = {
