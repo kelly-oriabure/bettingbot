@@ -501,18 +501,11 @@ def create_bot(token: str, post_init=None, post_shutdown=None) -> Application:
         name="Morning Broadcast",
     )
     
-    # Evening recap: 10 PM Lagos (9 PM UTC)
-    scheduler.add_job(
-        _send_evening_recap,
-        trigger=CronTrigger(hour=21, minute=0, timezone="UTC"),
-        args=[app],
-        id="evening_recap",
-        name="Evening Recap",
-    )
+    # Evening recap REMOVED — reduced to 1 broadcast/day to save API credits
     
     # Store scheduler — start it in post_init when event loop is running
     app._job_scheduler = scheduler
-    logger.info("Bot created with all handlers + daily scheduler (morning 5 AM UTC, evening 9 PM UTC)")
+    logger.info("Bot created with all handlers + daily scheduler (morning 5 AM UTC only)")
     return app
 
 
