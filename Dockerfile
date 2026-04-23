@@ -25,3 +25,4 @@ EXPOSE 8080
 
 # Run the bot
 CMD ["python", "-m", "app"]
+# deploy 1776952782
