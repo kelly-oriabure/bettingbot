@@ -545,7 +545,7 @@ class DataManager:
         logger.info(f"Today's matches with odds: {len(today_matches)}")
         return today_matches
     
-    async def get_upcoming_matches(self, hours_ahead: int = 168) -> List[Dict]:
+    async def get_upcoming_matches(self, hours_ahead: int = 24) -> List[Dict]:
         """Get upcoming matches for the next N hours."""
         upcoming = await self.odds_provider.get_upcoming_matches(hours_ahead=hours_ahead)
         

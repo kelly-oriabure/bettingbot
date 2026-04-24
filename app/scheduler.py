@@ -114,13 +114,13 @@ async def send_morning_broadcast(bot_token: str):
             logger.info("No matches today — fetching week's fixtures with predictions")
             
             # Fetch matches for the next 7 days
-            upcoming = await dm.get_upcoming_matches(hours_ahead=168)
+            upcoming = await dm.get_upcoming_matches(hours_ahead=24)
             
             if not upcoming:
                 await bot.send_message(
                     chat_id=CHANNEL_ID,
                     text=(
-                        f"⚽ **Football Update**\n"
+                        f"⚽ **FirmBetting Predictions**\n"
                         f"📅 {datetime.utcnow().strftime('%A, %B %d, %Y')}\n\n"
                         f"🏟️ International break in effect — no league fixtures this week.\n\n"
                         f"📅 League action returns next week!\n"
@@ -179,7 +179,7 @@ async def send_morning_broadcast(bot_token: str):
             # Build broadcast with predictions
             now = datetime.utcnow()
             msg = (
-                f"⚽ **Upcoming Predictions**\n"
+                f"⚽ **FirmBetting Predictions**\n"
                 f"📅 {now.strftime('%A, %B %d, %Y')}\n"
                 f"━━━━━━━━━━━━━━━━━━━━━━\n\n"
                 f"🏟️ No league matches today — here are the next fixtures with predictions!\n\n"
@@ -432,7 +432,7 @@ def _build_best_bets(predictions: List[dict]) -> str:
     
     msg += (
         f"━━━━━━━━━━━━━━━━━━━━━━\n"
-        f"_Higher confidence ≠ guaranteed. These are model probabilities only._\n"
+        f"_⚠️ Betting is at the owner's own risk. FirmBetting shall not be held liable for any losses. Please gamble responsibly._\n"
     )
     
     return msg
