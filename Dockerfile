@@ -13,7 +13,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy app code
 COPY app/ app/
-RUN mkdir -p data
+COPY data/ data/
 
 # Environment
 ENV PYTHONUNBUFFERED=1
