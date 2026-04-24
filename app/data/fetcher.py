@@ -202,53 +202,98 @@ class OddsProvider(ABC):
 # ═══════════════════════════════════════════════════════════════════════════════
 
 class OddsApiProvider(OddsProvider):
-    """The Odds API — 500 req/month free."""
+    """The Odds API — 500 req/month free. Supports key rotation."""
     
     def __init__(self, api_key: Optional[str] = None):
-        self.api_key = api_key or os.environ.get("ODDS_API_KEY", "")
+        env_key = api_key or os.environ.get("ODDS_API_KEY", "")
+        self.api_keys = []
+        if env_key:
+            self.api_keys.append(env_key)
+        backup_keys = os.environ.get("ODDS_API_BACKUP_KEYS", "")
+        if backup_keys:
+            self.api_keys.extend(k.strip() for k in backup_keys.split(",") if k.strip())
+        if not backup_keys:
+            self.api_keys.extend([
+                "c2daa19655f9b4c994693b89b2e91192",
+                "2f82efcaab9665282e435f481a9832ec",
+            ])
+        self._key_index = 0
         self.name = "The Odds API"
+    
+    @property
+    def api_key(self) -> str:
+        if not self.api_keys:
+            return ""
+        return self.api_keys[self._key_index % len(self.api_keys)]
+    
+    def _rotate_key(self) -> bool:
+        if len(self.api_keys) <= 1:
+            return False
+        self._key_index = (self._key_index + 1) % len(self.api_keys)
+        logger.info(f"[{self.name}] Rotated to key index {self._key_index} ({self.api_key[:8]}...)")
+        return True
     
     async def get_upcoming_matches(self, hours_ahead: int = 48) -> List[Dict]:
         all_matches = []
+        keys_tried = 0
         
-        async with httpx.AsyncClient() as client:
-            for sport_key, league_name in ODDS_API_LEAGUES.items():
-                try:
-                    r = await client.get(
-                        f"{ODDS_API_BASE}/sports/{sport_key}/odds",
-                        params={
-                            "apiKey": self.api_key,
-                            "regions": "eu,uk",
-                            "markets": "h2h,totals",
-                            "oddsFormat": "decimal",
-                        },
-                        timeout=15,
-                    )
-                    
-                    if r.status_code == 429:
-                        logger.warning(f"[{self.name}] Rate limit reached")
-                        break
-                    
-                    if r.status_code == 401:
-                        logger.warning(f"[{self.name}] Unauthorized - check API key")
-                        break
-                    
-                    if r.status_code == 200:
-                        for match in r.json():
-                            all_matches.append({
-                                "home_team": normalize_team_name(match["home_team"]),
-                                "away_team": normalize_team_name(match["away_team"]),
-                                "date": match["commence_time"],
-                                "league_name": league_name,
-                                "sport_key": sport_key,
-                                "bookmakers": match.get("bookmakers", []),
-                            })
-                    
-                    await asyncio.sleep(0.3)
-                except Exception as e:
-                    logger.debug(f"[{self.name}] Error ({league_name}): {e}")
+        while keys_tried < len(self.api_keys):
+            async with httpx.AsyncClient() as client:
+                league_ok = 0
+                rotated = False
+                for sport_key, league_name in ODDS_API_LEAGUES.items():
+                    try:
+                        r = await client.get(
+                            f"{ODDS_API_BASE}/sports/{sport_key}/odds",
+                            params={
+                                "apiKey": self.api_key,
+                                "regions": "eu,uk",
+                                "markets": "h2h,totals",
+                                "oddsFormat": "decimal",
+                            },
+                            timeout=15,
+                        )
+                        
+                        remaining = r.headers.get("x-requests-remaining")
+                        if remaining is not None:
+                            try:
+                                if int(remaining) <= 0:
+                                    logger.warning(f"[{self.name}] Key {self.api_key[:8]}... exhausted ({remaining} remaining)")
+                                    rotated = True
+                                    break
+                            except ValueError:
+                                pass
+                        
+                        if r.status_code in (429, 401):
+                            logger.warning(f"[{self.name}] Key {self.api_key[:8]}... {'rate limited' if r.status_code==429 else 'unauthorized'}")
+                            rotated = True
+                            break
+                        
+                        if r.status_code == 200:
+                            for match in r.json():
+                                all_matches.append({
+                                    "home_team": normalize_team_name(match["home_team"]),
+                                    "away_team": normalize_team_name(match["away_team"]),
+                                    "date": match["commence_time"],
+                                    "league_name": league_name,
+                                    "sport_key": sport_key,
+                                    "bookmakers": match.get("bookmakers", []),
+                                })
+                            league_ok += 1
+                        
+                        await asyncio.sleep(0.3)
+                    except Exception as e:
+                        logger.debug(f"[{self.name}] Error ({league_name}): {e}")
+                
+                if league_ok > 0:
+                    break
+                
+                keys_tried += 1
+                if not self._rotate_key():
+                    logger.error(f"[{self.name}] All {len(self.api_keys)} keys exhausted")
+                    break
         
-        logger.info(f"[{self.name}]: {len(all_matches)} upcoming matches")
+        logger.info(f"[{self.name}]: {len(all_matches)} upcoming matches (key {self._key_index})")
         return all_matches
     
     def extract_odds(self, match: Dict) -> Dict:
