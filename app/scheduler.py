@@ -122,9 +122,9 @@ async def send_morning_broadcast(bot_token: str):
                     text=(
                         f"⚽ **FirmBetting Predictions**\n"
                         f"📅 {datetime.utcnow().strftime('%A, %B %d, %Y')}\n\n"
-                        f"🏟️ International break in effect — no league fixtures this week.\n\n"
-                        f"📅 League action returns next week!\n"
-                        f"🔔 We'll be back with daily predictions as soon as fixtures resume."
+                        f"🏟️ No fixtures available right now.\n\n"
+                        f"📅 Check back tomorrow for fresh predictions!\n"
+                        f"🔔 Daily picks drop every morning at 6 AM."
                     ),
                     parse_mode="Markdown",
                 )
