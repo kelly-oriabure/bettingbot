@@ -432,7 +432,7 @@ def _build_best_bets(predictions: List[dict]) -> str:
     
     msg += (
         f"━━━━━━━━━━━━━━━━━━━━━━\n"
-        f"_⚠️ Betting is at the owner's own risk. FirmBetting shall not be held liable for any losses. Please gamble responsibly._\n"
+        f"\n⚠️ _Bet at your own risk. FirmBetting is not liable for any losses._\n"
     )
     
     return msg
