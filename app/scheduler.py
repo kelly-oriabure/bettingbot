@@ -65,12 +65,12 @@ async def send_morning_broadcast(bot_token: str):
     try:
         from app.data.fetcher import DataManager
         from app.models.dixon_coles import DixonColesModel
-        
+
         dm = DataManager()
-        
-        # 1. Get today's fixtures
-        fixtures = await dm.get_todays_predictions_data()
-        
+
+        # 1. Get fixtures for next 72h (today + upcoming)
+        all_fixtures = await dm.get_upcoming_matches(hours_ahead=72)
+
         # 2. Load trained model
         model_path = os.path.join(os.path.dirname(__file__), "..", "data", "model.json")
         model = None
@@ -83,423 +83,207 @@ async def send_morning_broadcast(bot_token: str):
                 for k in model.params if k.startswith("attack_")
             ))
             model.fitted = True
-        
-        # 3. Run predictions on all fixtures
-        predictions = []
-        if model and model.fitted:
-            for fixture in fixtures:
-                pred = model.predict_match(fixture["home_team"], fixture["away_team"])
-                if pred:
-                    predictions.append({
-                        "home_team": pred.home_team,
-                        "away_team": pred.away_team,
-                        "home_win_prob": pred.home_win_prob,
-                        "draw_prob": pred.draw_prob,
-                        "away_win_prob": pred.away_win_prob,
-                        "expected_home_goals": pred.expected_home_goals,
-                        "expected_away_goals": pred.expected_away_goals,
-                        "over_under_25": pred.over_under_25,
-                        "btts_prob": pred.btts_prob,
-                        "confidence": pred.confidence,
-                    })
-        
-        # Sort by confidence
-        predictions.sort(
-            key=lambda p: max(p["home_win_prob"], p["draw_prob"], p["away_win_prob"]),
-            reverse=True,
-        )
-        
-        # If no matches today, get the week's fixtures WITH predictions
-        if not fixtures:
-            logger.info("No matches today — fetching week's fixtures with predictions")
-            
-            # Fetch matches for the next 7 days
-            upcoming = await dm.get_upcoming_matches(hours_ahead=24)
-            
-            if not upcoming:
-                await bot.send_message(
-                    chat_id=CHANNEL_ID,
-                    text=(
-                        f"⚽ **FirmBetting Predictions**\n"
-                        f"📅 {datetime.utcnow().strftime('%A, %B %d, %Y')}\n\n"
-                        f"🏟️ No fixtures available right now.\n\n"
-                        f"📅 Check back tomorrow for fresh predictions!\n"
-                        f"🔔 Daily picks drop every morning at 6 AM."
-                    ),
-                    parse_mode="Markdown",
-                )
-                return
-            
-            # Run predictions on upcoming fixtures
-            upcoming_preds = []
-            if model and model.fitted:
-                logger.info(f"Model loaded: {len(model.teams)} teams, predicting {len(upcoming)} fixtures")
-                logger.debug(f"Model teams: {sorted(model.teams)[:10]}...")
-                for fixture in upcoming:
-                    home = fixture["home_team"]
-                    away = fixture["away_team"]
-                    home_ok = home in model.teams
-                    away_ok = away in model.teams
-                    if not home_ok or not away_ok:
-                        logger.debug(f"Skip {home} vs {away}: home={home_ok}, away={away_ok}")
-                    pred = model.predict_match(home, away)
-                    if pred:
-                        upcoming_preds.append({
-                            "home_team": pred.home_team,
-                            "away_team": pred.away_team,
-                            "home_win_prob": pred.home_win_prob,
-                            "draw_prob": pred.draw_prob,
-                            "away_win_prob": pred.away_win_prob,
-                            "expected_home_goals": pred.expected_home_goals,
-                            "expected_away_goals": pred.expected_away_goals,
-                            "over_under_25": pred.over_under_25,
-                            "btts_prob": pred.btts_prob,
-                            "confidence": pred.confidence,
-                            "date": fixture["date"],
-                            "league_name": fixture.get("league_name", ""),
-                        })
-            
-            upcoming_preds.sort(
-                key=lambda p: max(p["home_win_prob"], p["draw_prob"], p["away_win_prob"]),
-                reverse=True,
-            )
-            
-            # Group by date for broadcast
-            by_date = {}
-            for m in upcoming:
-                try:
-                    dt = datetime.fromisoformat(m["date"].replace("Z", "+00:00"))
-                    date_key = dt.strftime("%A %b %d")
-                    if date_key not in by_date:
-                        by_date[date_key] = []
-                    by_date[date_key].append(m)
-                except:
-                    pass
-            
-            # Build broadcast with predictions
-            now = datetime.utcnow()
-            msg = (
-                f"⚽ **FirmBetting Predictions**\n"
-                f"📅 {now.strftime('%A, %B %d, %Y')}\n"
-                f"━━━━━━━━━━━━━━━━━━━━━━\n\n"
-                f"🏟️ No league matches today — here are the next fixtures with predictions!\n\n"
-            )
-            
-            # Top 5 hot picks
-            if upcoming_preds:
-                msg += "🔥 **Top Picks This Week**\n\n"
-                for i, pred in enumerate(upcoming_preds[:5], 1):
-                    hw = pred["home_win_prob"]
-                    dr = pred["draw_prob"]
-                    aw = pred["away_win_prob"]
-                    conf = pred.get("confidence", "medium")
-                    conf_emoji = {"high": "🟢", "medium": "🟡", "low": "⚪"}.get(conf, "🟡")
-                    
-                    if hw > dr and hw > aw:
-                        pick = f"🏠 {pred['home_team']}"
-                        pct = hw
-                    elif aw > dr:
-                        pick = f"✈️ {pred['away_team']}"
-                        pct = aw
-                    else:
-                        pick = "🤝 Draw"
-                        pct = dr
-                    
-                    ou = "Over 2.5" if pred.get("over_under_25", 0) > 0.5 else "Under 2.5"
-                    btts = "BTTS ✅" if pred.get("btts_prob", 0) > 0.5 else "BTTS ❌"
-                    
-                    try:
-                        dt = datetime.fromisoformat(pred["date"].replace("Z", "+00:00"))
-                        date_str = (dt + timedelta(hours=1)).strftime("%a %b %d")
-                    except:
-                        date_str = "TBD"
-                    
-                    msg += (
-                        f"**{i}. {pred['home_team']} vs {pred['away_team']}** ({date_str})\n"
-                        f"   {conf_emoji} {pick} ({pct*100:.0f}%) | {ou} | {btts}\n\n"
-                    )
-            
-            # Fixture schedule (compact)
-            msg += "📅 **Full Schedule**\n\n"
-            for date_key, matches in list(by_date.items())[:7]:
-                try:
-                    dt = datetime.fromisoformat(matches[0]["date"].replace("Z", "+00:00"))
-                    time_str = (dt + timedelta(hours=1)).strftime("%H:%M")
-                except:
-                    time_str = "TBD"
-                
-                msg += f"**{date_key}**\n"
-                for m in matches[:5]:
-                    try:
-                        dt = datetime.fromisoformat(m["date"].replace("Z", "+00:00"))
-                        t = (dt + timedelta(hours=1)).strftime("%H:%M")
-                    except:
-                        t = "TBD"
-                    msg += f"  {t}  {m['home_team']} vs {m['away_team']}\n"
-                if len(matches) > 5:
-                    msg += f"  ... +{len(matches)-5} more\n"
-                msg += "\n"
-            
-            await bot.send_message(
-                chat_id=CHANNEL_ID,
-                text=msg,
-                parse_mode="Markdown",
-            )
-            logger.info(f"Upcoming predictions sent: {len(upcoming)} matches, {len(upcoming_preds)} predictions")
+
+        if not model or not model.fitted:
+            logger.error("Model not loaded — skipping broadcast")
             return
-        
-        # 4. Build broadcast message
-        broadcast = _build_morning_broadcast(predictions, fixtures)
-        
-        # 5. Send to channel
-        await bot.send_message(
-            chat_id=CHANNEL_ID,
-            text=broadcast,
-            parse_mode="Markdown",
-        )
-        
-        logger.info(f"✅ Morning broadcast sent: {len(predictions)} predictions, {len(fixtures)} fixtures")
-        _set_last_broadcast_date(datetime.utcnow().strftime("%Y-%m-%d"))
-        
-        # 6. If there are many fixtures, send a second message with all fixtures
-        if len(fixtures) > 10:
-            fixtures_list = _build_fixtures_list(fixtures)
-            await bot.send_message(
-                chat_id=CHANNEL_ID,
-                text=fixtures_list,
-                parse_mode="Markdown",
-            )
-        
-        # 7. Send top 3 "best bets" as a separate highlight
-        if predictions:
-            best_bets = _build_best_bets(predictions[:3])
-            await bot.send_message(
-                chat_id=CHANNEL_ID,
-                text=best_bets,
-                parse_mode="Markdown",
-            )
-        
+
+        # 3. Split into today (0-24h) and upcoming (24-72h)
+        now = datetime.utcnow()
+        t24 = now + timedelta(hours=24)
+        today_fix = []
+        upcoming_fix = []
+        for f in all_fixtures:
+            try:
+                dt = datetime.fromisoformat(f["date"].replace("Z", "+00:00")).replace(tzinfo=None)
+                if now <= dt <= t24:
+                    today_fix.append(f)
+                elif t24 < dt <= now + timedelta(hours=72):
+                    upcoming_fix.append(f)
+            except:
+                pass
+
+        logger.info(f"Today: {len(today_fix)} | Upcoming 48-72h: {len(upcoming_fix)}")
+
+        # 4. Helper functions for odds extraction and formatting
+        def extract_1x2(fixture):
+            hp, dp, ap = [], [], []
+            for bk in fixture.get("bookmakers", []):
+                for mk in bk.get("markets", []):
+                    if mk["key"] == "h2h":
+                        for o in mk["outcomes"]:
+                            if o["name"] == fixture["home_team"]:
+                                hp.append(1 / o["price"])
+                            elif o["name"] == fixture["away_team"]:
+                                ap.append(1 / o["price"])
+                            elif o["name"] == "Draw":
+                                dp.append(1 / o["price"])
+            if not hp:
+                return None
+            return {
+                "home_odds": round(1 / (sum(hp) / len(hp)), 2),
+                "draw_odds": round(1 / (sum(dp) / len(dp)), 2) if dp else 0,
+                "away_odds": round(1 / (sum(ap) / len(ap)), 2) if ap else 0,
+                "home_impl": round(sum(hp) / len(hp), 4),
+                "draw_impl": round(sum(dp) / len(dp), 4) if dp else 0,
+                "away_impl": round(sum(ap) / len(ap), 4) if ap else 0,
+            }
+
+        def extract_totals(fixture):
+            ov, un = [], []
+            for bk in fixture.get("bookmakers", []):
+                for mk in bk.get("markets", []):
+                    if mk["key"] == "totals":
+                        for o in mk["outcomes"]:
+                            if o.get("point") == 2.5:
+                                if "Over" in o["name"]:
+                                    ov.append(1 / o["price"])
+                                elif "Under" in o["name"]:
+                                    un.append(1 / o["price"])
+            if not ov:
+                return None
+            return {
+                "over_odds": round(1 / (sum(ov) / len(ov)), 2),
+                "under_odds": round(1 / (sum(un) / len(un)), 2),
+                "over_impl": round(sum(ov) / len(ov), 4),
+                "under_impl": round(sum(un) / len(un), 4),
+            }
+
+        def fmt_time(d):
+            try:
+                return (datetime.fromisoformat(d.replace("Z", "+00:00")) + timedelta(hours=1)).strftime("%a %H:%M")
+            except:
+                return "TBD"
+
+        def fmt_day(d):
+            try:
+                return (datetime.fromisoformat(d.replace("Z", "+00:00")) + timedelta(hours=1)).strftime("%a %b %d")
+            except:
+                return "TBD"
+
+        def val_ind(mp, ip):
+            e = (mp - ip) * 100
+            if e > 8: return f"✅+{e:.0f}%"
+            elif e > 3: return f"⚡+{e:.0f}%"
+            elif e > -3: return "—"
+            else: return f"❌{e:.0f}%"
+
+        def pick_a(p):
+            h, d, a = p["home_win_prob"], p["draw_prob"], p["away_win_prob"]
+            if h > d and h > a: return f"🏠 {p['home_team']}", h
+            elif a > d: return f"✈️ {p['away_team']}", a
+            else: return "🤝 Draw", d
+
+        # 5. Build predictions with odds
+        def build_preds(fixtures):
+            results = []
+            for fix in fixtures:
+                o1x2 = extract_1x2(fix)
+                if not o1x2:
+                    continue
+                pred = model.predict_match(fix["home_team"], fix["away_team"])
+                if not pred:
+                    continue
+                tot = extract_totals(fix) or {"over_odds": 0, "under_odds": 0, "over_impl": 0, "under_impl": 0}
+                ho, do, ao = o1x2["home_odds"], o1x2["draw_odds"], o1x2["away_odds"]
+                results.append({
+                    "home_team": pred.home_team, "away_team": pred.away_team,
+                    "home_win_prob": pred.home_win_prob, "draw_prob": pred.draw_prob,
+                    "away_win_prob": pred.away_win_prob,
+                    "expected_home_goals": pred.expected_home_goals,
+                    "expected_away_goals": pred.expected_away_goals,
+                    "over_under_25": pred.over_under_25, "btts_prob": pred.btts_prob,
+                    "confidence": pred.confidence,
+                    **o1x2, **tot,
+                    "league_name": fix.get("league_name", ""),
+                    "date": fix.get("date", ""),
+                    "dc_1x": round(1 / (1 / ho + 1 / do), 2) if ho and do else 0,
+                    "dc_12": round(1 / (1 / ho + 1 / ao), 2) if ho and ao else 0,
+                    "dc_x2": round(1 / (1 / do + 1 / ao), 2) if do and ao else 0,
+                })
+            results.sort(key=lambda p: max(p["home_win_prob"], p["draw_prob"], p["away_win_prob"]), reverse=True)
+            return results
+
+        today_preds = build_preds(today_fix)
+        upcoming_preds = build_preds(upcoming_fix)
+
+        # No matches at all
+        if not today_preds and not upcoming_preds:
+            await bot.send_message(chat_id=CHANNEL_ID, text=(
+                f"⚽ **FirmBetting Predictions**\n📅 {now.strftime('%A, %B %d, %Y')}\n"
+                f"━━━━━━━━━━━━━━━━━━━━━━\n\n🏟️ No fixtures available right now.\n\n"
+                f"📅 Check back tomorrow for fresh predictions!\n"
+                f"🔔 Daily picks drop every morning at 6 AM.\n\n"
+                f"⚠️ _Bet at your own risk. FirmBetting is not liable for any losses._"
+            ), parse_mode="Markdown")
+            _set_last_broadcast_date(now.strftime("%Y-%m-%d"))
+            return
+
+        # 6. Build enhanced broadcast
+        msg = f"⚽ **FirmBetting Predictions**\n📅 {now.strftime('%A, %B %d, %Y')}\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+
+        if today_preds:
+            msg += f"🏟️ **Today's Picks** ({len(today_preds)} matches)\n\n"
+            for i, p in enumerate(today_preds[:10], 1):
+                ce = {"high": "🟢", "medium": "🟡", "low": "⚪"}.get(p["confidence"], "🟡")
+                pk, pct = pick_a(p)
+                vh, vd, va = val_ind(p["home_win_prob"], p["home_impl"]), val_ind(p["draw_prob"], p["draw_impl"]), val_ind(p["away_win_prob"], p["away_impl"])
+                bt = "Yes" if p["btts_prob"] > 0.5 else "No"
+                ou = "Over" if p["over_under_25"] > 0.5 else "Under"
+                msg += (
+                    f"**{i}. {p['home_team']} vs {p['away_team']}** | {p['league_name']} | {fmt_time(p['date'])}\n"
+                    f"   {ce} Pick: **{pk}** ({pct * 100:.0f}%)\n"
+                    f"   ┌─ 1X2: H{p['home_odds']} {vh} | D{p['draw_odds']} {vd} | A{p['away_odds']} {va}\n"
+                    f"   ├─ BTTS: {bt} ({max(p['btts_prob'], 1-p['btts_prob'])*100:.0f}%) | O/U: {ou} ({max(p['over_under_25'], 1-p['over_under_25'])*100:.0f}%)\n"
+                    f"   ├─ DC: 1X@{p['dc_1x']} | 12@{p['dc_12']} | X2@{p['dc_x2']}\n"
+                    f"   └─ xG: {p['expected_home_goals']}–{p['expected_away_goals']}\n\n"
+                )
+        else:
+            msg += "🏟️ **Today** — No matches today. Check early picks below!\n\n"
+
+        if upcoming_preds:
+            msg += f"🔥 **Early Value Picks** ({len(upcoming_preds)} upcoming)\n_Get these odds before they move!_\n\n"
+            by_day = {}
+            for p in upcoming_preds:
+                d = fmt_day(p["date"])
+                by_day.setdefault(d, []).append(p)
+            for day, matches in list(by_day.items())[:5]:
+                msg += f"**{day}**\n"
+                for p in matches[:8]:
+                    pk, pct = pick_a(p)
+                    ce = {"high": "🟢", "medium": "🟡", "low": "⚪"}.get(p["confidence"], "🟡")
+                    vh, vd, va = val_ind(p["home_win_prob"], p["home_impl"]), val_ind(p["draw_prob"], p["draw_impl"]), val_ind(p["away_win_prob"], p["away_impl"])
+                    msg += (
+                        f"  {fmt_time(p['date'])} **{p['home_team']} vs {p['away_team']}** ({p['league_name']})\n"
+                        f"    {ce} {pk} ({pct*100:.0f}%) | H{p['home_odds']} {vh} | D{p['draw_odds']} {vd} | A{p['away_odds']} {va}\n"
+                        f"    xG {p['expected_home_goals']}–{p['expected_away_goals']}\n\n"
+                    )
+
+        # Value bets
+        vb = []
+        for p in today_preds + upcoming_preds:
+            for mt, mp, ip, od in [("Home", p["home_win_prob"], p["home_impl"], p["home_odds"]), ("Draw", p["draw_prob"], p["draw_impl"], p["draw_odds"]), ("Away", p["away_win_prob"], p["away_impl"], p["away_odds"]), ("Over 2.5", p["over_under_25"], p.get("over_impl", 0), p.get("over_odds", 0)), ("Under 2.5", 1-p["over_under_25"], p.get("under_impl", 0), p.get("under_odds", 0))]:
+                if ip > 0 and mp > ip and (mp - ip) > 0.06 and mp > 0.55:
+                    vb.append({"match": f"{p['home_team']} vs {p['away_team']}", "market": mt, "odds": od, "pct": round(mp*100), "edge": round((mp-ip)*100), "day": fmt_day(p["date"])})
+        if vb:
+            vb.sort(key=lambda x: x["edge"], reverse=True)
+            msg += "🎯 **Best Value Bets**\n\n"
+            for v in vb[:6]:
+                msg += f"  🏆 **{v['match']}** ({v['day']}) → {v['market']} @{v['odds']} | Model: {v['pct']}% | Edge: +{v['edge']}%\n"
+
+        msg += "\n━━━━━━━━━━━━━━━━━━━━━━\n⚠️ _Bet at your own risk. FirmBetting is not liable for any losses._\n"
+
+        # Send — split if too long
+        if len(msg) <= 4096:
+            await bot.send_message(chat_id=CHANNEL_ID, text=msg, parse_mode="Markdown")
+        else:
+            lines = msg.split("\n")
+            mid = len(lines) // 2
+            await bot.send_message(chat_id=CHANNEL_ID, text="\n".join(lines[:mid]) + "\n\n_(continued...)_", parse_mode="Markdown")
+            await bot.send_message(chat_id=CHANNEL_ID, text="⚽ **(cont.)**\n\n" + "\n".join(lines[mid:]), parse_mode="Markdown")
+
+        _set_last_broadcast_date(now.strftime("%Y-%m-%d"))
+        logger.info(f"✅ Broadcast sent: {len(today_preds)} today, {len(upcoming_preds)} upcoming, {len(vb)} value bets")
+
     except Exception as e:
         logger.error(f"Morning broadcast failed: {e}", exc_info=True)
-
-
-def _build_morning_broadcast(predictions: List[dict], fixtures: List[dict]) -> str:
-    """Build the main morning broadcast message."""
-    now = datetime.utcnow()
-    
-    # Header
-    msg = (
-        f"⚽ **{'Good Morning' if now.hour < 12 else 'Hello'} Football Fans!**\n"
-        f"📅 {now.strftime('%A, %B %d, %Y')}\n"
-        f"━━━━━━━━━━━━━━━━━━━━━━\n\n"
-    )
-    
-    # Today's fixture count
-    leagues = set()
-    for f in fixtures:
-        if f.get("league_name"):
-            leagues.add(f["league_name"])
-    
-    msg += f"🏟️ **{len(fixtures)} matches** across {len(leagues)} leagues today\n"
-    if leagues:
-        msg += f"📋 {', '.join(sorted(leagues)[:5])}\n"
-    msg += "\n"
-    
-    # Hot picks (top 5 predictions)
-    msg += "🔥 **Top Predictions**\n\n"
-    
-    for i, pred in enumerate(predictions[:5], 1):
-        home = pred["home_team"]
-        away = pred["away_team"]
-        hw = pred.get("home_win_prob", 0)
-        dr = pred.get("draw_prob", 0)
-        aw = pred.get("away_win_prob", 0)
-        conf = pred.get("confidence", "medium")
-        conf_emoji = {"high": "🟢", "medium": "🟡", "low": "⚪"}.get(conf, "🟡")
-        
-        if hw > dr and hw > aw:
-            pick = f"🏠 {home}"
-            pct = hw
-        elif aw > dr:
-            pick = f"✈️ {away}"
-            pct = aw
-        else:
-            pick = "🤝 Draw"
-            pct = dr
-        
-        ou = "Over 2.5" if pred.get("over_under_25", 0) > 0.5 else "Under 2.5"
-        btts = "BTTS ✅" if pred.get("btts_prob", 0) > 0.5 else "BTTS ❌"
-        
-        msg += (
-            f"**{i}. {home} vs {away}**\n"
-            f"   {conf_emoji} {pick} ({pct*100:.0f}%) | {ou} | {btts}\n"
-        )
-    
-    # Expected goals highlights
-    if predictions:
-        highest_scoring = max(predictions, key=lambda p: p.get("expected_home_goals", 0) + p.get("expected_away_goals", 0))
-        total_xg = highest_scoring.get("expected_home_goals", 0) + highest_scoring.get("expected_away_goals", 0)
-        if total_xg > 2.5:
-            msg += (
-                f"\n💥 **Highest-scoring match:** {highest_scoring['home_team']} vs {highest_scoring['away_team']} "
-                f"(xG: {total_xg:.1f} total)\n"
-            )
-    
-    # Engagement hook
-    msg += f"\n━━━━━━━━━━━━━━━━━━━━━━\n"
-    
-    return msg
-
-
-def _build_fixtures_list(fixtures: List[dict]) -> str:
-    """Build a complete fixtures list for the day."""
-    now = datetime.utcnow()
-    
-    msg = (
-        f"📋 **All Today's Fixtures**\n"
-        f"📅 {now.strftime('%B %d, %Y')}\n"
-        f"━━━━━━━━━━━━━━━━━━━━━━\n\n"
-    )
-    
-    # Group by league
-    by_league = {}
-    for f in fixtures:
-        league = f.get("league_name", "Unknown")
-        if league not in by_league:
-            by_league[league] = []
-        by_league[league].append(f)
-    
-    for league, matches in sorted(by_league.items()):
-        msg += f"**{league}**\n"
-        for m in matches[:10]:  # Cap at 10 per league
-            home = m.get("home_team", "?")
-            away = m.get("away_team", "?")
-            date = m.get("date", "")
-            time_str = ""
-            if date:
-                try:
-                    dt = datetime.fromisoformat(date.replace("Z", "+00:00"))
-                    time_str = dt.strftime("%H:%M")
-                except:
-                    pass
-            msg += f"  {time_str:>5}  {home} vs {away}\n"
-        if len(matches) > 10:
-            msg += f"  ... and {len(matches) - 10} more\n"
-        msg += "\n"
-    
-    return msg
-
-
-def _build_best_bets(predictions: List[dict]) -> str:
-    """Build a 'best bets' highlight message."""
-    msg = (
-        f"💎 **Today's Best Bets**\n"
-        f"━━━━━━━━━━━━━━━━━━━━━━\n\n"
-    )
-    
-    for i, pred in enumerate(predictions, 1):
-        home = pred["home_team"]
-        away = pred["away_team"]
-        hw = pred.get("home_win_prob", 0)
-        dr = pred.get("draw_prob", 0)
-        aw = pred.get("away_win_prob", 0)
-        ou_25 = pred.get("over_under_25", 0)
-        btts = pred.get("btts_prob", 0)
-        xg_total = pred.get("expected_home_goals", 0) + pred.get("expected_away_goals", 0)
-        
-        # Determine strongest signal
-        signals = []
-        if hw > 0.55:
-            signals.append(f"🏠 Home Win ({hw*100:.0f}%)")
-        elif aw > 0.45:
-            signals.append(f"✈️ Away Win ({aw*100:.0f}%)")
-        elif dr > 0.30:
-            signals.append(f"🤝 Draw ({dr*100:.0f}%)")
-        
-        if ou_25 > 0.65:
-            signals.append(f"📈 Over 2.5 ({ou_25*100:.0f}%)")
-        elif ou_25 < 0.35:
-            signals.append(f"📉 Under 2.5 ({(1-ou_25)*100:.0f}%)")
-        
-        if btts > 0.65:
-            signals.append(f"⚽ BTTS Yes ({btts*100:.0f}%)")
-        
-        msg += (
-            f"**{i}. {home} vs {away}**\n"
-            f"   {' | '.join(signals)}\n"
-            f"   xG: {xg_total:.1f} total\n\n"
-        )
-    
-    msg += (
-        f"━━━━━━━━━━━━━━━━━━━━━━\n"
-        f"\n⚠️ _Bet at your own risk. FirmBetting is not liable for any losses._\n"
-    )
-    
-    return msg
-
-
-async def send_evening_recap(bot_token: str):
-    """Evening recap: today's results + performance review."""
-    bot = Bot(token=bot_token)
-    
-    if not CHANNEL_ID:
-        return
-    
-    logger.info("Sending evening recap...")
-    
-    try:
-        from app.data.fetcher import DataManager
-        
-        dm = DataManager()
-        today = datetime.utcnow().strftime("%Y-%m-%d")
-        fixtures = await dm.api_football.get_fixtures_today()
-        
-        # Filter to completed matches
-        completed = [f for f in fixtures if f.get("status") == "FT" or f.get("home_goals") is not None]
-        
-        if not completed:
-            await bot.send_message(
-                chat_id=CHANNEL_ID,
-                text="📋 No completed matches yet for today's recap. Check back later!",
-                parse_mode="Markdown",
-            )
-            return
-        
-        msg = (
-            f"🌙 **Evening Recap**\n"
-            f"📅 {datetime.utcnow().strftime('%B %d, %Y')}\n"
-            f"━━━━━━━━━━━━━━━━━━━━━━\n\n"
-        )
-        
-        for m in completed[:15]:
-            home = m.get("home_team", "?")
-            away = m.get("away_team", "?")
-            hg = m.get("home_goals", 0)
-            ag = m.get("away_goals", 0)
-            
-            if hg > ag:
-                result = "🏠"
-            elif ag > hg:
-                result = "✈️"
-            else:
-                result = "🤝"
-            
-            msg += f"  {result} **{home} {hg}-{ag} {away}**\n"
-        
-        msg += (
-            f"\n━━━━━━━━━━━━━━━━━━━━━━\n"
-            f"💬 How did your picks do? Share in the channel!\n"
-            f"📈 See you tomorrow for more predictions.\n"
-        )
-        
-        await bot.send_message(
-            chat_id=CHANNEL_ID,
-            text=msg,
-            parse_mode="Markdown",
-        )
-        
-        logger.info(f"✅ Evening recap sent: {len(completed)} results")
-        _set_last_broadcast_date(datetime.utcnow().strftime("%Y-%m-%d_evening"))
-        
-    except Exception as e:
-        logger.error(f"Evening recap failed: {e}", exc_info=True)
