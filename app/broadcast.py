@@ -21,15 +21,66 @@ def _format_percent(value: float) -> str:
     return f"{value * 100:.1f}%"
 
 
+def _title_case(value: Optional[str]) -> str:
+    return (value or "unknown").replace("_", " ").title()
+
+
+def format_pick_label(market_type: str, selection: str, home_team: str, away_team: str) -> str:
+    """Convert stored market codes into plain-language Telegram copy."""
+    market_type = market_type.lower()
+    selection = selection.lower()
+
+    if market_type == "1x2":
+        labels = {
+            "home": f"{home_team} to win",
+            "draw": "Draw",
+            "away": f"{away_team} to win",
+        }
+        return labels.get(selection, selection)
+
+    if market_type == "double_chance":
+        labels = {
+            "1x": f"{home_team} or draw",
+            "12": f"{home_team} or {away_team}",
+            "x2": f"Draw or {away_team}",
+        }
+        return labels.get(selection, selection)
+
+    if market_type in {"over_under_1_5", "over_under_2_5"}:
+        goals = "1.5" if market_type == "over_under_1_5" else "2.5"
+        direction = "Over" if selection == "over" else "Under"
+        return f"{direction} {goals} goals"
+
+    if market_type == "btts":
+        return "Both teams to score" if selection == "yes" else "Not both teams to score"
+
+    return f"{_title_case(market_type)}: {_title_case(selection)}"
+
+
+def _simple_reason(prediction: dict) -> str:
+    confidence = prediction.get("confidence")
+    if confidence == "high":
+        return "This is one of today's stronger picks."
+    if confidence == "medium":
+        return "This pick has enough support to make the shortlist."
+    return "This pick is included, but stake carefully."
+
+
 def _format_prediction_line(prediction: dict) -> str:
-    odds_text = f" | Odds: {prediction['price']:.2f}" if prediction.get("price") is not None else ""
     kickoff = parse_provider_datetime(prediction["kickoff_time"]).strftime("%H:%M UTC")
     league = prediction.get("league_name") or "Unknown league"
+    pick = format_pick_label(
+        prediction["market_type"],
+        prediction["selection"],
+        prediction["home_team"],
+        prediction["away_team"],
+    )
     return (
-        f"{kickoff} | {league} | {prediction['home_team']} vs {prediction['away_team']}\n"
-        f"Market: {prediction['market_type']} | Pick: {prediction['selection']} | "
-        f"Probability: {_format_percent(prediction['probability'])} | "
-        f"Confidence: {prediction['confidence']}{odds_text}"
+        f"{prediction['home_team']} vs {prediction['away_team']}\n"
+        f"League: {league} | Kickoff: {kickoff}\n"
+        f"Prediction: {pick}\n"
+        f"Confidence: {_title_case(prediction['confidence'])}\n"
+        f"Why: {_simple_reason(prediction)}"
     )
 
 
@@ -80,7 +131,7 @@ def build_daily_prediction_broadcast(
         if parse_provider_datetime(prediction["kickoff_time"]).date().isoformat() == target
     ]
 
-    title = f"FirmBetting Daily Predictions - {target}"
+    title = f"FirmBetting Daily Picks - {target}"
     if not predictions:
         return [
             "\n\n".join(
@@ -92,9 +143,17 @@ def build_daily_prediction_broadcast(
             )
         ]
 
-    lines = [title, ""]
-    lines.extend(_format_prediction_line(prediction) for prediction in predictions)
-    lines.extend(["", DISCLAIMER])
+    high_count = sum(1 for prediction in predictions if prediction.get("confidence") == "high")
+    medium_count = sum(1 for prediction in predictions if prediction.get("confidence") == "medium")
+    lines = [
+        title,
+        "",
+        f"Today's shortlist: {len(predictions)} pick(s)",
+        f"High confidence: {high_count} | Medium confidence: {medium_count}",
+        "",
+    ]
+    lines.extend(f"{index}. {_format_prediction_line(prediction)}" for index, prediction in enumerate(predictions, 1))
+    lines.extend(["", "Reminder:", DISCLAIMER])
     return split_telegram_message("\n\n".join(lines))
 
 

@@ -171,9 +171,16 @@ async def send_morning_broadcast(bot_token: str):
 
         def pick_a(p):
             h, d, a = p["home_win_prob"], p["draw_prob"], p["away_win_prob"]
-            if h > d and h > a: return f"🏠 {p['home_team']}", h
-            elif a > d: return f"✈️ {p['away_team']}", a
-            else: return "🤝 Draw", d
+            if h > d and h > a: return f"{p['home_team']} to win", h
+            elif a > d: return f"{p['away_team']} to win", a
+            else: return "Draw", d
+
+        def simple_reason(confidence):
+            if confidence == "high":
+                return "This is one of today's stronger picks."
+            if confidence == "medium":
+                return "This pick has enough support to make the shortlist."
+            return "This pick is included, but stake carefully."
 
         # 5. Build predictions with odds
         def build_preds(fixtures):
@@ -211,80 +218,66 @@ async def send_morning_broadcast(bot_token: str):
         # No matches at all
         if not today_preds and not upcoming_preds:
             await bot.send_message(chat_id=CHANNEL_ID, text=(
-                f"⚽ **FirmBetting Predictions**\n📅 {now.strftime('%A, %B %d, %Y')}\n"
-                f"━━━━━━━━━━━━━━━━━━━━━━\n\n🏟️ No fixtures available right now.\n\n"
-                f"📅 Check back tomorrow for fresh predictions!\n"
-                f"🔔 Daily picks drop every morning at 6 AM.\n\n"
-                f"⚠️ _Bet at your own risk. FirmBetting is not liable for any losses._"
-            ), parse_mode="Markdown")
+                f"FirmBetting Daily Picks\n{now.strftime('%A, %B %d, %Y')}\n\n"
+                f"No eligible picks are available right now.\n\n"
+                f"No prediction is guaranteed. Bet responsibly."
+            ))
             _set_last_broadcast_date(now.strftime("%Y-%m-%d"))
             return
 
-        # 6. Build enhanced broadcast
-        msg = f"⚽ **FirmBetting Predictions**\n📅 {now.strftime('%A, %B %d, %Y')}\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+        # 6. Build a simple public broadcast. Technical details stay in storage/logs.
+        total_picks = len(today_preds) + len(upcoming_preds)
+        high_count = sum(1 for p in today_preds + upcoming_preds if p["confidence"] == "high")
+        medium_count = sum(1 for p in today_preds + upcoming_preds if p["confidence"] == "medium")
+        msg = (
+            f"FirmBetting Daily Picks\n{now.strftime('%A, %B %d, %Y')}\n\n"
+            f"Today's shortlist: {total_picks} pick(s)\n"
+            f"High confidence: {high_count} | Medium confidence: {medium_count}\n\n"
+        )
 
         if today_preds:
-            msg += f"🏟️ **Today's Picks** ({len(today_preds)} matches)\n\n"
+            msg += f"Today's Picks ({len(today_preds)})\n\n"
             for i, p in enumerate(today_preds[:10], 1):
-                ce = {"high": "🟢", "medium": "🟡", "low": "⚪"}.get(p["confidence"], "🟡")
                 pk, pct = pick_a(p)
-                vh, vd, va = val_ind(p["home_win_prob"], p["home_impl"]), val_ind(p["draw_prob"], p["draw_impl"]), val_ind(p["away_win_prob"], p["away_impl"])
-                bt = "Yes" if p["btts_prob"] > 0.5 else "No"
-                ou = "Over" if p["over_under_25"] > 0.5 else "Under"
                 msg += (
-                    f"**{i}. {p['home_team']} vs {p['away_team']}** | {p['league_name']} | {fmt_time(p['date'])}\n"
-                    f"   {ce} Pick: **{pk}** ({pct * 100:.0f}%)\n"
-                    f"   ┌─ 1X2: H{p['home_odds']} {vh} | D{p['draw_odds']} {vd} | A{p['away_odds']} {va}\n"
-                    f"   ├─ BTTS: {bt} ({max(p['btts_prob'], 1-p['btts_prob'])*100:.0f}%) | O/U: {ou} ({max(p['over_under_25'], 1-p['over_under_25'])*100:.0f}%)\n"
-                    f"   ├─ DC: 1X@{p['dc_1x']} | 12@{p['dc_12']} | X2@{p['dc_x2']}\n"
-                    f"   └─ xG: {p['expected_home_goals']}–{p['expected_away_goals']}\n\n"
+                    f"{i}. {p['home_team']} vs {p['away_team']}\n"
+                    f"League: {p['league_name'] or 'Unknown league'} | Kickoff: {fmt_time(p['date'])}\n"
+                    f"Prediction: {pk}\n"
+                    f"Confidence: {p['confidence'].title()}\n"
+                    f"Why: {simple_reason(p['confidence'])}\n\n"
                 )
         else:
-            msg += "🏟️ **Today** — No matches today. Check early picks below!\n\n"
+            msg += "No eligible picks for today. Check early picks below.\n\n"
 
         if upcoming_preds:
-            msg += f"🔥 **Early Value Picks** ({len(upcoming_preds)} upcoming)\n_Get these odds before they move!_\n\n"
+            msg += f"Early Picks ({len(upcoming_preds)} upcoming)\n\n"
             by_day = {}
             for p in upcoming_preds:
                 d = fmt_day(p["date"])
                 by_day.setdefault(d, []).append(p)
             for day, matches in list(by_day.items())[:5]:
-                msg += f"**{day}**\n"
+                msg += f"{day}\n"
                 for p in matches[:8]:
                     pk, pct = pick_a(p)
-                    ce = {"high": "🟢", "medium": "🟡", "low": "⚪"}.get(p["confidence"], "🟡")
-                    vh, vd, va = val_ind(p["home_win_prob"], p["home_impl"]), val_ind(p["draw_prob"], p["draw_impl"]), val_ind(p["away_win_prob"], p["away_impl"])
                     msg += (
-                        f"  {fmt_time(p['date'])} **{p['home_team']} vs {p['away_team']}** ({p['league_name']})\n"
-                        f"    {ce} {pk} ({pct*100:.0f}%) | H{p['home_odds']} {vh} | D{p['draw_odds']} {vd} | A{p['away_odds']} {va}\n"
-                        f"    xG {p['expected_home_goals']}–{p['expected_away_goals']}\n\n"
+                        f"{fmt_time(p['date'])} | {p['home_team']} vs {p['away_team']}\n"
+                        f"Prediction: {pk}\n"
+                        f"Confidence: {p['confidence'].title()}\n\n"
                     )
 
-        # Value bets
-        vb = []
-        for p in today_preds + upcoming_preds:
-            for mt, mp, ip, od in [("Home", p["home_win_prob"], p["home_impl"], p["home_odds"]), ("Draw", p["draw_prob"], p["draw_impl"], p["draw_odds"]), ("Away", p["away_win_prob"], p["away_impl"], p["away_odds"]), ("Over 2.5", p["over_under_25"], p.get("over_impl", 0), p.get("over_odds", 0)), ("Under 2.5", 1-p["over_under_25"], p.get("under_impl", 0), p.get("under_odds", 0))]:
-                if ip > 0 and mp > ip and (mp - ip) > 0.06 and mp > 0.55:
-                    vb.append({"match": f"{p['home_team']} vs {p['away_team']}", "market": mt, "odds": od, "pct": round(mp*100), "edge": round((mp-ip)*100), "day": fmt_day(p["date"])})
-        if vb:
-            vb.sort(key=lambda x: x["edge"], reverse=True)
-            msg += "🎯 **Best Value Bets**\n\n"
-            for v in vb[:6]:
-                msg += f"  🏆 **{v['match']}** ({v['day']}) → {v['market']} @{v['odds']} | Model: {v['pct']}% | Edge: +{v['edge']}%\n"
-
-        msg += "\n━━━━━━━━━━━━━━━━━━━━━━\n⚠️ _Bet at your own risk. FirmBetting is not liable for any losses._\n"
+        msg += "\nReminder:\nNo prediction is guaranteed. Bet responsibly."
 
         # Send — split if too long
         if len(msg) <= 4096:
-            await bot.send_message(chat_id=CHANNEL_ID, text=msg, parse_mode="Markdown")
+            await bot.send_message(chat_id=CHANNEL_ID, text=msg)
         else:
             lines = msg.split("\n")
             mid = len(lines) // 2
-            await bot.send_message(chat_id=CHANNEL_ID, text="\n".join(lines[:mid]) + "\n\n_(continued...)_", parse_mode="Markdown")
-            await bot.send_message(chat_id=CHANNEL_ID, text="⚽ **(cont.)**\n\n" + "\n".join(lines[mid:]), parse_mode="Markdown")
+            await bot.send_message(chat_id=CHANNEL_ID, text="\n".join(lines[:mid]) + "\n\n(continued...)")
+            await bot.send_message(chat_id=CHANNEL_ID, text="FirmBetting Daily Picks (continued)\n\n" + "\n".join(lines[mid:]))
 
         _set_last_broadcast_date(now.strftime("%Y-%m-%d"))
-        logger.info(f"✅ Broadcast sent: {len(today_preds)} today, {len(upcoming_preds)} upcoming, {len(vb)} value bets")
+        logger.info("✅ Broadcast sent: %s today, %s upcoming", len(today_preds), len(upcoming_preds))
 
     except Exception as e:
         logger.error(f"Morning broadcast failed: {e}", exc_info=True)

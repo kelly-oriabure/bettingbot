@@ -75,14 +75,15 @@ class PredictionBroadcastTests(unittest.TestCase):
             messages = build_daily_prediction_broadcast(str(db_path), date(2026, 5, 20), minimum_confidence="medium")
             text = "\n".join(messages)
 
-            self.assertIn("FirmBetting Daily Predictions - 2026-05-20", text)
+            self.assertIn("FirmBetting Daily Picks - 2026-05-20", text)
+            self.assertIn("Today's shortlist: 1 pick(s)", text)
             self.assertIn("Home 123 vs Away 123", text)
-            self.assertIn("Market: 1x2", text)
-            self.assertIn("Pick: home", text)
-            self.assertIn("Probability: 64.0%", text)
-            self.assertIn("Confidence: high", text)
-            self.assertIn("Odds: 2.00", text)
+            self.assertIn("Prediction: Home 123 to win", text)
+            self.assertIn("Confidence: High", text)
+            self.assertIn("Why: This is one of today's stronger picks.", text)
             self.assertIn("No prediction is guaranteed", text)
+            self.assertNotIn("Probability:", text)
+            self.assertNotIn("Odds:", text)
 
     def test_broadcast_excludes_low_confidence_predictions_when_configured(self):
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -127,8 +128,8 @@ class PredictionBroadcastTests(unittest.TestCase):
             )
             text = "\n".join(messages)
 
-            self.assertIn("Market: btts", text)
-            self.assertNotIn("Market: 1x2", text)
+            self.assertIn("Prediction: Both teams to score", text)
+            self.assertNotIn("Prediction: Home one to win", text)
 
 
 if __name__ == "__main__":
