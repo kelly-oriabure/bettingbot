@@ -15,9 +15,14 @@ import aiohttp
 import httpx
 import pandas as pd
 from abc import ABC, abstractmethod
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Optional, Any
 import logging
+from app.data.provider_http import (
+    ProviderConfigurationError,
+    ProviderRateLimitError,
+    fetch_json_with_retries,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -179,6 +184,15 @@ def normalize_team_name(name: str) -> str:
     return TEAM_NAME_MAP.get(name, name)
 
 
+def parse_fixture_time(date_str: str) -> datetime:
+    """Parse provider fixture time and normalize it to timezone-aware UTC."""
+    normalized = date_str.strip().replace("Z", "+00:00")
+    match_time = datetime.fromisoformat(normalized)
+    if match_time.tzinfo is None:
+        match_time = match_time.replace(tzinfo=timezone.utc)
+    return match_time.astimezone(timezone.utc)
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # ODDS PROVIDER BASE CLASS
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -212,13 +226,9 @@ class OddsApiProvider(OddsProvider):
         backup_keys = os.environ.get("ODDS_API_BACKUP_KEYS", "")
         if backup_keys:
             self.api_keys.extend(k.strip() for k in backup_keys.split(",") if k.strip())
-        if not backup_keys:
-            self.api_keys.extend([
-                "c2daa19655f9b4c994693b89b2e91192",
-                "2f82efcaab9665282e435f481a9832ec",
-            ])
         self._key_index = 0
         self.name = "The Odds API"
+        self.quota_metadata = {}
     
     @property
     def api_key(self) -> str:
@@ -234,6 +244,10 @@ class OddsApiProvider(OddsProvider):
         return True
     
     async def get_upcoming_matches(self, hours_ahead: int = 48) -> List[Dict]:
+        if not self.api_keys:
+            logger.error("[%s] ODDS_API_KEY is not configured; skipping odds fetch", self.name)
+            return []
+
         all_matches = []
         keys_tried = 0
         
@@ -243,7 +257,8 @@ class OddsApiProvider(OddsProvider):
                 rotated = False
                 for sport_key, league_name in ODDS_API_LEAGUES.items():
                     try:
-                        r = await client.get(
+                        response = await fetch_json_with_retries(
+                            client,
                             f"{ODDS_API_BASE}/sports/{sport_key}/odds",
                             params={
                                 "apiKey": self.api_key,
@@ -253,8 +268,11 @@ class OddsApiProvider(OddsProvider):
                             },
                             timeout=15,
                         )
+                        if response.quota_headers:
+                            self.quota_metadata = response.quota_headers
+                            logger.info("[%s] quota metadata: %s", self.name, response.quota_headers)
                         
-                        remaining = r.headers.get("x-requests-remaining")
+                        remaining = response.quota_headers.get("x-requests-remaining")
                         if remaining is not None:
                             try:
                                 if int(remaining) <= 0:
@@ -263,25 +281,23 @@ class OddsApiProvider(OddsProvider):
                                     break
                             except ValueError:
                                 pass
-                        
-                        if r.status_code in (429, 401):
-                            logger.warning(f"[{self.name}] Key {self.api_key[:8]}... {'rate limited' if r.status_code==429 else 'unauthorized'}")
-                            rotated = True
-                            break
-                        
-                        if r.status_code == 200:
-                            for match in r.json():
-                                all_matches.append({
-                                    "home_team": normalize_team_name(match["home_team"]),
-                                    "away_team": normalize_team_name(match["away_team"]),
-                                    "date": match["commence_time"],
-                                    "league_name": league_name,
-                                    "sport_key": sport_key,
-                                    "bookmakers": match.get("bookmakers", []),
-                                })
-                            league_ok += 1
+
+                        for match in response.data:
+                            all_matches.append({
+                                "home_team": normalize_team_name(match["home_team"]),
+                                "away_team": normalize_team_name(match["away_team"]),
+                                "date": match["commence_time"],
+                                "league_name": league_name,
+                                "sport_key": sport_key,
+                                "bookmakers": match.get("bookmakers", []),
+                            })
+                        league_ok += 1
                         
                         await asyncio.sleep(0.3)
+                    except (ProviderConfigurationError, ProviderRateLimitError) as e:
+                        logger.warning(f"[{self.name}] Key {self.api_key[:8]}... {e}")
+                        rotated = True
+                        break
                     except Exception as e:
                         logger.debug(f"[{self.name}] Error ({league_name}): {e}")
                 
@@ -564,6 +580,13 @@ class DataManager:
     def __init__(self):
         self.odds_provider = get_odds_provider()
         self.api_football = FootballDataClient()
+
+    async def get_training_data(self, league_ids: List[int] = None, seasons: List[int] = None) -> pd.DataFrame:
+        """Fetch historical training data through the API-Football client."""
+        return await self.api_football.get_training_data(league_ids=league_ids, seasons=seasons)
+
+    def _utc_now(self) -> datetime:
+        return datetime.now(timezone.utc)
     
     async def get_todays_predictions_data(self) -> List[Dict]:
         """Get today's fixtures with odds for prediction."""
@@ -573,15 +596,13 @@ class DataManager:
             logger.info(f"No upcoming matches from {self.odds_provider.name}")
             return []
         
-        now = datetime.utcnow()
+        now = self._utc_now()
+        window_end = now + timedelta(hours=24)
         today_matches = []
         for m in upcoming:
             try:
-                date_str = m.get("date", "").replace("Z", "+00:00")
-                if "+" not in date_str[-6:] and "-" not in date_str[-6:]:
-                    date_str += "+00:00"
-                match_time = datetime.fromisoformat(date_str)
-                if now <= match_time <= now + timedelta(hours=24):
+                match_time = parse_fixture_time(m.get("date", ""))
+                if now <= match_time <= window_end:
                     m["odds"] = self.odds_provider.extract_odds(m)
                     today_matches.append(m)
             except Exception as e:
@@ -598,7 +619,8 @@ class DataManager:
             logger.info(f"No upcoming matches from {self.odds_provider.name}")
             return []
         
-        now = datetime.utcnow()
+        now = self._utc_now()
+        window_end = now + timedelta(hours=hours_ahead)
         upcoming_matches = []
         parse_errors = 0
         
@@ -607,13 +629,9 @@ class DataManager:
                 date_str = m.get("date", "")
                 if not date_str:
                     continue
-                # Handle various ISO formats
-                date_str = date_str.replace("Z", "+00:00")
-                if "+" not in date_str[-6:] and "-" not in date_str[-6:]:
-                    date_str += "+00:00"
-                match_time = datetime.fromisoformat(date_str)
+                match_time = parse_fixture_time(date_str)
                 
-                if now <= match_time <= now + timedelta(hours=hours_ahead):
+                if now <= match_time <= window_end:
                     m["odds"] = self.odds_provider.extract_odds(m)
                     upcoming_matches.append(m)
             except Exception as e:
@@ -622,13 +640,6 @@ class DataManager:
         
         if parse_errors > 0:
             logger.warning(f"Failed to parse {parse_errors} fixture dates")
-        
-        # Fallback: if time filtering removed ALL matches, return all upcoming
-        if len(upcoming_matches) == 0 and len(upcoming) > 0:
-            logger.warning(f"Time filtering removed all {len(upcoming)} matches — using all available")
-            for m in upcoming:
-                m["odds"] = self.odds_provider.extract_odds(m)
-                upcoming_matches.append(m)
         
         logger.info(f"Upcoming matches: {len(upcoming_matches)} (from {len(upcoming)} total)")
         return upcoming_matches

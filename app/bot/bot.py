@@ -406,64 +406,48 @@ async def _run_prediction(
     """
     Run prediction for a match.
     
-    In production, this uses trained models loaded from disk.
-    For now, returns a mock prediction structure.
+    Uses trained models loaded from disk. Returns None when model/data
+    requirements are unavailable so the bot never fabricates predictions.
     """
-    # Try to import and use the real models
     try:
-        from app.models.dixon_coles import DixonColesModel
-        
-        # Check if a trained model exists
         model_path = os.path.join(os.path.dirname(__file__), "..", "..", "data", "model.json")
-        if os.path.exists(model_path):
-            model = DixonColesModel()
-            # Load trained params
-            with open(model_path) as f:
-                model.params = json.load(f)
-                model.teams = list(set(
-                    k.replace("attack_", "").replace("defense_", "")
-                    for k in model.params
-                    if k.startswith("attack_")
-                ))
-                model.fitted = True
-            
-            pred = model.predict_match(home_team, away_team)
-            if pred:
-                return {
-                    "home_team": pred.home_team,
-                    "away_team": pred.away_team,
-                    "home_win_prob": pred.home_win_prob,
-                    "draw_prob": pred.draw_prob,
-                    "away_win_prob": pred.away_win_prob,
-                    "expected_home_goals": pred.expected_home_goals,
-                    "expected_away_goals": pred.expected_away_goals,
-                    "top_scores": pred.top_scores,
-                    "over_under_25": pred.over_under_25,
-                    "btts_prob": pred.btts_prob,
-                    "confidence": pred.confidence,
-                }
+        if not os.path.exists(model_path):
+            logger.warning("Prediction unavailable: model file missing at %s", model_path)
+            return None
+
+        from app.models.dixon_coles import DixonColesModel
+
+        model = DixonColesModel()
+        with open(model_path) as f:
+            model.params = json.load(f)
+            model.teams = list(set(
+                k.replace("attack_", "").replace("defense_", "")
+                for k in model.params
+                if k.startswith("attack_")
+            ))
+            model.fitted = True
+        
+        pred = model.predict_match(home_team, away_team)
+        if not pred:
+            logger.warning("Prediction unavailable: unknown teams or insufficient model data for %s vs %s", home_team, away_team)
+            return None
+
+        return {
+            "home_team": pred.home_team,
+            "away_team": pred.away_team,
+            "home_win_prob": pred.home_win_prob,
+            "draw_prob": pred.draw_prob,
+            "away_win_prob": pred.away_win_prob,
+            "expected_home_goals": pred.expected_home_goals,
+            "expected_away_goals": pred.expected_away_goals,
+            "top_scores": pred.top_scores,
+            "over_under_25": pred.over_under_25,
+            "btts_prob": pred.btts_prob,
+            "confidence": pred.confidence,
+        }
     except Exception as e:
-        logger.debug(f"Real model prediction failed: {e}")
-    
-    # Mock prediction for testing
-    import random
-    hw = random.uniform(0.3, 0.6)
-    aw = random.uniform(0.2, 0.5)
-    dr = 1 - hw - aw
-    
-    return {
-        "home_team": home_team,
-        "away_team": away_team,
-        "home_win_prob": round(hw, 4),
-        "draw_prob": round(dr, 4),
-        "away_win_prob": round(aw, 4),
-        "expected_home_goals": round(random.uniform(0.8, 2.2), 2),
-        "expected_away_goals": round(random.uniform(0.5, 1.8), 2),
-        "top_scores": [("1-0", 0.18), ("0-0", 0.14), ("1-1", 0.12)],
-        "over_under_25": round(random.uniform(0.4, 0.7), 4),
-        "btts_prob": round(random.uniform(0.4, 0.65), 4),
-        "confidence": random.choice(["high", "medium", "medium", "low"]),
-    }
+        logger.error("Prediction unavailable for %s vs %s: %s", home_team, away_team, e, exc_info=True)
+        return None
 
 
 # ─── Bot Setup ─────────────────────────────────────────────────

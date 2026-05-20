@@ -1,0 +1,1120 @@
+Football
+
+General Rules
+All markets (except halftime, first-half markets, overtime and penalty shootout) are considered for regular time plus injury time. Unless otherwise stated for specific bet typologies overtimes and penalty shootouts will not affect the outcome of the bet.
+
+If a match is interrupted and continued within 48h after initial kickoff, all open bets will be settled with the final result. Otherwise all undecided bets are considered void.
+
+Regular 90 Minutes: Markets are based on the result at the end of a scheduled 90 minutes play unless otherwise stated. This includes any added injury or stoppage time but does not include extra-time, time allocated for a penalty shootout or golden goal.
+
+If the market remains open when the following events have already taken place: goals, red or yellow-red cards and penalties, we reserve the right to void betting. If the market was opened with a missing or incorrect red card, we reserve the right to void betting. If odds were offered with an incorrect match time (more than 5 minutes), we reserve the right to void betting. If a wrong score is entered, all markets will be cancelled for the time when the incorrect score was displayed. If a match is interrupted or postponed and is not continued within 48h after initial kick-off date betting will be void. If the team names or category are displayed incorrectly, we reserve the right to void betting. In case of any score or card/corner/penalty related changes, we reserve the right to void betting on any video assistant referee (VAR) situation.
+
+Corners
+Only taken corners will be considered, corners awarded but not taken would not be counted.
+
+The time used is time corner was taken.
+
+Bets will be settled on the exact time the corners are taken rather than awarded or detailed by relevant third-party feed providers. If any resulting corner is not taken, it will not count for betting purposes.
+
+Bookings
+Yellow card counts as 1 card and red or yellow-red card as 2. The 2nd yellow for one player which leads to a yellow red card is not considered. As a consequence one player cannot cause more than 3 cards.
+
+Settlement will be made according to all available evidence of cards shown during the regular 90 minutes play. Cards shown after the match are not considered.
+
+Cards shown during half-time break will be settled as cards shown into the second half.
+
+Cards for non-players (already substituted players, managers, players on the bench) are not considered.
+
+Yellow card counts as 10 points and red or yellow red cards as 25. The 2nd yellow for one player which leads to a yellow red card is not considered. As a consequence, one player cannot cause more than 35 booking points.
+
+Player Markets
+
+Player Markets are considered markets based on individual player performance.
+If the selected player participates in the match, all Player Markets bets associated with that player will be considered valid, regardless of whether they started as a starter or entered as a substitute.
+The bet will be considered valid for settlement regardless of the time the player was on the field. However, if the player does not participate in the match at all, all bets on that player will be voided.
+The aforementioned rules do not apply to the following markets (including overtime): Player Shots on Goal, Player Shots, Player Assists, Player Tackles, Player Passes, Player To Be Carded, and Player H2Hs.
+
+Anytime/Last/Next Goalscorer and Player to Score X or More
+Own goals will not be considered for Anytime Goalscorer or Player to score X or more settlement purposes and are ignored.
+
+All players who took part in the match since kick off or previous goal are considered as runners.
+
+All players who are currently taking part are listed.
+
+If for any reason an unlisted player scores a goal all bets on listed players stand.
+
+The following type of players are voided: 
+Non fielders: Players who were not announced in the match day squad.
+Bench-players: Players who were announced in the squad but remained on the substitute bench and did not play in the game.
+
+Market will be settled based on TV insert and statistics provided by Press Association unless there is clear evidence that these statistics are not correct.
+
+First Goalscorer
+Own goals will not be considered for Next Goalscorer settlement purposes and are ignored.
+
+All players who took part in the match since kick off or previous goal are considered as runners.
+
+All players who are currently taking part are listed.
+
+If for any reason an unlisted player scores a goal all bets on listed players stand.
+
+The following type of players are voided:
+Non fielders: Players who were not announced in the match day squad.
+Bench-players: Players who were announced in the squad but remained on the substitute bench and did not play in the game.
+Late Substitutes: Players who came into the game, after the first goal was scored
+
+Market will be settled based on TV insert and statistics provided by Press Association unless there is clear evidence that these statistics are not correct.
+
+Player Assists
+A final contribution (pass, shot or any other touch of the ball) made by a player leading to the receiving teammate scoring a goal.
+
+An assist may not be counted if the attempt is deflected via an opposition player and the recipient was unlikely to have received the ball without the deflection.
+
+Assists are not given for own goals, penalties, goals scored directly from corners or goals scored directly from direct free kicks.
+
+MLS Pre-Assist rule
+A Pre-Assist does not count as an assist for betting purposes.
+
+This statistic is not recognized as an official assist and is not included when settling any assist-related markets.
+
+Only the official assist is used for settlement.
+
+If a player makes the pass before the assist, it does not qualify and is ignored for betting.
+
+Player Goals 
+The number of goals scored by a player in the opposition net.
+
+A goal may not be counted if the attempt is off-target and deflected into the net via an opposition player (own goal).
+
+Player Total Attempted Passes
+Predict the total number of successful passes, assists, and failed passes.
+
+Player Passes
+Predict how many passes will a player attempt in the match. Overtime included. Bets on non-starters will be voided.
+
+Player Shots
+Predict the total number of shots on goal, goals, shots off target, and shots hitting the post.
+
+Player Shots on Target
+Predict the total number of shots on goal and goals.
+
+Player Offsides
+Predict the total number of offsides.
+
+Player Assists
+Predict the total number of assists.
+
+Player Shots on Target from Outside Box
+Predict the total number of shots on target and goals from outside the penalty box.
+
+Player Score from Outside Box
+Predict the total number of goals scored from outside the penalty box.
+
+Player Fouls
+Predict the total number of fouls committed by the player.
+
+Player 1st Half Shots on Target
+Predict the total number of shots on goal and goals during the first half.
+
+Player 2nd Half Shots on Target
+Predict the total number of shots on goal and goals during the second half.
+
+Player Shots on Target Each Half 
+Predict the total shots on target made by a player in each half
+
+Player Steals
+Predict the total number of steals made by the player.
+
+Player Tackles
+Predict the total number of tackles made by the player.
+
+First Player Booked
+Predict which player will receive the first card in the match.
+
+Player To Be Carded
+Predict whether the player will receive a yellow card or a red card.
+
+First Goalscorer
+Predict which player will score the first goal in the match.
+
+Last Goalscorer
+Predict which player will score the last goal in the match.
+
+To Score in First 10 Mins
+Predict whether the player will score a goal within the first 10 minutes.
+
+Player To Score In 1st Half
+Predict whether the player will score a goal in the first half.
+
+Player To Score In 2nd Half
+Predict whether the player will score a goal in the second half.
+
+Player To Score in Both Halves
+Predict whether the player will score at least one goal in each half.
+
+To Score a Header
+Predict whether the player will score a goal with a header.
+
+Player To Score a Free-Kick
+Predict whether the player will score a goal from a direct free kick.
+
+Player To Score with Right Foot
+Predict whether the player will score a goal with their right foot.
+
+Player To Score with Left Foot
+Predict whether the player will score a goal with their left foot.
+
+Player Right Foot Shots on Target
+Predict the total number of shots on goal and goals made with the right foot.
+
+Player Left Foot Shots on Target
+Predict the total number of shots on goal and goals made with the left foot.
+
+First To Score for Their Team
+Predict which player will score the first goal for their team.
+
+To Score or Assist
+Predict whether the player will either score a goal or provide an assist.
+
+To Score and Assist
+Predict whether the player will both score a goal and provide an assist.
+
+Player Saves
+Predict the total number of saves made by the player.
+
+Player Total Shots
+Any clear attempt by a player to score a goal (on target, off target or blocked).
+
+Shots going over or wide or saved by the goalkeeper are included.
+
+Blocked shots by any players are included.
+
+Shots that hit the frame are included.
+
+Set-piece attempts (corners or free kicks) that have no clear intent to score a goal and do not directly result in a goal are not included.
+
+Other attempts that have no clear intent to score a goal, such as a cross-cum-shot or flick-on, that do not directly result in a goal are not included.
+
+A shot can be made with any part of the body as long as it is legal according to the rules of the game.
+
+Player Total Shots On Goal
+An attempt by a player which directly results in a goal (regardless of clear intent to score a goal), or, a clear attempt by a player to score a goal that clearly would have went into the net if not for a goalkeeper save or a stop made by the last-man (with the goalkeeper clearly unable to save).
+
+Shots that hit the frame and directly go into the net resulting in a goal are included.
+
+Shots that hit the frame and do not directly go into the net are not included.
+
+Blocked shots by any players not considered the last-man are not included.
+
+Set-piece attempts (corners or free kicks) that have no clear intent to score a goal and do not directly result in a goal are not included.
+
+Other attempts that have no clear intent to score a goal, such as a cross-cum-shot or flick-on, that do not directly result in a goal are not included.
+
+A shot can be made with any part of the body as long as it is legal according to the rules of the game.
+
+Player Total Passes
+Attempted pass (successful or unsuccessful) with the clear intention of one player to find a teammate.
+
+Open-play passes are included. Goal kicks, free kicks, or corners that are played as an attempted pass (played short) are included.
+
+Crosses, throw-ins, and keeper throws are not included.
+
+A pass can be made with any part of the body as long as it is legal according to the rules of the game.
+
+Player Total tackles
+When a player connects with the ball in a ground challenge, successfully takes the ball away from the player in possession.
+
+All outcomes of a successful tackle are included (player/teammate takes possession, the ball goes out of play or the ball goes to an opposition player).
+
+Missed tackles (failed attempts), aerial duels, fouls, and pass interceptions are not included.
+
+The tackled player must clearly be in possession of the ball before the tackle is made.
+
+Interval Markets
+Markets will be settled based on the goal time announced by TV. If this is not available, the time according to the match clock is considered.
+
+Goal markets are settled based on the time the ball crosses the line, and not the time the kick is made.
+
+Corner interval markets are settled based on the time the corner kick is taken and not the time the corner is conceded or awarded.
+
+Booking interval markets are settled based on the time the card is shown and not the time the infringement is made.
+
+Offsides will be settled based on the time when the referee gives the decision.
+
+This rule will be applied on any video assistant referee (VAR) situation.
+
+Penalty markets will be settled based on the time when the referee gives the decision. This rule will be applied on any video assistant referee (VAR) situation.
+
+Penalties awarded but not taken are not considered.
+
+For all 5 min/10 min/15 min interval markets, related to interval minutes 41- 45/31-40/31-45, events (goals, corners) in added injury or stoppage time will be accounted for.
+
+Next Scoring Type
+Freekick: The goal has to be scored directly from the freekick or corner to qualify as a goal by freekick. Deflected shots count as long as the freekick or corner taker is awarded the goal.
+
+Penalty: Goal must be scored directly from the penalty. Goals after a rebound of a missed penalty do not count.
+
+Own Goal: If goal is declared as an own goal.
+
+Header: The scorers last touch has to be with the head.
+
+Shot: Goal has to be with any other part of the body than the head and the other types do not apply.
+
+No Goal.
+
+1X2
+Which team will win the match. Overtime not included.
+
+Double Chance
+Predict the match result combining two of the three possible outcomes (1X, X2 or 12).
+
+Draw No Bet
+Predict the winner of the match. If the teams draw, the selection will be voided.
+
+Home No Bet
+Predict the result at regular time. If Home team wins, the selection will be voided.
+
+Away No Bet
+Predict the result at regular time. If Away team wins, the selection will be voided.
+
+Handicap
+Predict the winner in regular time taking in consideration the handicap in brackets.
+
+Asian Handicap
+Predict the winner in regular time taking in consideration the handicap in brackets. Quarter ball (0.25; 0.75; 1.25 etc.) advantage can be settled as won,lost or half won/half lost while the other half of the stake is returned. Half ball (0.5; 1.5; 2.5 etc.) advantage can be settled as won or lost. Whole ball (1; 2; 3 etc.) advantage can be settled as won, lost or void.
+
+Tickets are settled according to the full-time result using the following logic:
+
+Handicap Line 0
+The team that wins by any margin is to be settled as the winning selection. In the event of a draw all tickets are void.
+
+Handicap Line 0.25
+If the team that is giving (-) a 0.25 ball start:
+
+Wins - All tickets on this selection are settled as won
+Draws - Half the stake is void, the other half is settled as lost
+Loses - All tickets on this selection are settled as lost
+If the team that is receiving (+) a 0.25 ball start:
+
+Wins - All tickets on this selection are settled as won
+Draws - Half the stake is settled at the odds of the chosen selection, the other half is void
+Loses - All tickets on this selection are settled as lost
+Handicap Line 0.5
+If the team that is giving (-) a 0.5 ball start:
+
+Wins - All tickets on this selection are settled as won
+Draws - All tickets on this selection are settled as lost
+Loses - All tickets on this selection are settled as lost
+If the team that is receiving (+) a 0.5 ball start:
+
+Wins - All tickets on this selection are settled as won
+Draws - All tickets on this selection are settled as won
+Loses - All tickets on this selection are settled as lost
+Handicap Line 0.75
+If the team that is giving (-) a 0.75 ball start:
+
+Wins by ≥2 goals - All tickets on this selection are settled as won
+Wins by 1 goal - Half the stake is settled at the odds of the chosen selection, the other half is void
+Draws or Loses - All tickets on this selection are settled as lost
+If the team that is receiving (+) a 0.75 ball start:
+
+Wins or Draws - All tickets on this selection are settled as won
+Loses by 1 goal - Half the stake is void, the other half is settled as lost
+Loses by ≥2 goals - All tickets on this selection are settled as lost
+Handicap Line 1.0
+If the team that is giving (-) a 1.0 ball start:
+
+Wins by ≥2goals - All tickets on this selection are settled as won
+Wins by 1 goal - All tickets on this selection are void
+Draws or Loses -  All tickets on this selection are settled as lost
+If the team that is receiving (+) a 1.0 ball start:
+
+Wins or Draws - All tickets on this selection are settled as won
+Loses by 1 goal - All tickets on this selection are void
+Loses by ≥2 goals - All tickets on this selection are settled as lost
+Handicap	Team result	Bet result	Handicap	Team result	Bet result
+0	Win	Win	0	Win	Win
+Draw	Void	Draw	Void
+Lose	Lose	Lose	Lose
+-0.25	Win	Win	0.25	Win	Win
+Draw	Half lose	Draw	Half win
+Lose	Lose	Lose	Lose
+-0.5	Win	Win	0.5	Win	Win
+Draw	Lose	Draw	Win
+Lose	Lose	Lose	Lose
+-0.75	Win by 2+	Win	0.75	Win	Win
+Win by 1	Half win	Draw	Win
+Draw	Lose	Lose by 1	Half Lose
+Lose	Lose	Lose by 2+	Lose
+-1	Win by 2+	Win	1	Win	Win
+Win by 1	Void	Draw	Win
+Draw	Lose	Lose by 1	Void
+Lose	Lose	Lose by 2+	Lose
+-1.25	Win by 2+	Win	1.25	Win	Win
+Win by 1	Half lose	Draw	Win
+Draw	Lose	Lose by 1	Half win
+Lose	Lose	Lose by 2+	Lose
+-1.5	Win by 2+	Win	1.5	Win	Win
+Win by 1	Lose	Draw	Win
+Draw	Lose	Lose by 1	Win
+Lose	Lose	Lose by 2+	Lose
+-1.75	Win by 3+	Win	1.75	Win	Win
+Win by 2	Half win	Draw	Win
+Win by 1	Lose	Lose by 1	Win
+Draw	Lose	Lose by 2	Half lose
+Lose	Lose	Lose by 3+	Lose
+-2	Win by 3+	Win	2	Win	Win
+Win by 2	Void	Draw	Win
+Win by 1	Lose	Lose by 1	Win
+Draw	Lose	Lose by 2	Void
+Lose	Lose	Lose by 3+	Lose
+Over/Under
+Predict whether the total number of goals scored in regular time is over/under a given line.
+Quarter line (0.75; 1.25; 1.75 etc.) can be settled as won, lost or half won/half lost while the other half of the stake is returned. Half line (0.5; 1.5; 2.5 etc.) can be settled as won or lost. Whole line (1; 2; 3 etc.) can be settled as won, lost or void.
+
+Tickets are settled according to the full-time result using the following logic:
+
+Over/Under 2.0
+Bets on under 2 goals:
+
+<2 goals scored - All tickets on this selection are settled as won
+2 goals scored - All tickets on this selection are void
+>2 goals scored - All tickets on this selection are settled as lost
+Bets on over 2 goals:
+
+<2 goals scored - All tickets on this selection are settled as lost
+2 goals scored - All tickets on this selection are void
+>2 goals scored - All tickets on this selection are settled as won
+Over/Under 2.25
+Bets on under 2.25 goals:
+
+<2 goals scored - All tickets on this selection are settled as won
+2 goals scored - Half the stake is settled at the odds of the chosen selection, the other half is void
+>2 goals scored - All tickets on this selection are settled as lost
+Bets on over 2.25 goals:
+
+<2 goals scored - All tickets on this selection are settled as lost
+2 goals scored - Half the stake is void, the other half is settled as lost
+>2 goals scored - All tickets on this selection are settled as won
+Over/Under 2.5
+Bets on under 2.5 goals:
+
+≤ 2 goals scored - All tickets on this selection are settled as won
+>2 goals scored - All tickets on this selection are settled as lost
+Bets on over 2.5 goals:
+
+≤ 2 goals scored - All tickets on this selection are settled as lost
+>2 goals scored - All tickets on this selection are settled as won
+Over/Under 2.75
+Bets on under 2.75 goals:
+
+≤ 2 goals scored - All tickets on this selection are settled as won
+3 goals scored - Half the stake is void, the other half is settled as lost
+>3 goals scored - All tickets on this selection are settled as lost
+Bets on over 2.75 goals:
+
+≤ 2 goals scored - All tickets on this selection are settled as lost
+3 goals scored - Half the stake is settled at the odds of the chosen selection, the other half is void
+>3 goals scored - All tickets on this selection are settled as won
+Over/Under 3.0
+Bets on under 3 goals:
+
+≤ 2 goals scored - All tickets on this selection are settled as won
+3 goals scored - All tickets on this selection are void
+>3 goals scored - All tickets on this selection are settled as lost
+Bets on over 3 goals:
+
+≤ 2 goals scored - All tickets on this selection are settled as lost
+3 goals scored - All tickets on this selection are void
+>3 goals scored - All tickets on this selection are settled as won
+Over	Result	Bet result	Under	Result	Bet result
+0.5	0 goals	Lose	0.5	0 Goals	Win
+1+ goals	Win	1+ goals	Lose
+0.75	0 goals	Lose	0.75	0 goals	Win
+1 goal	Half win	1 goal	Half lose
+2+ goals	Win	2+ goals	Lose
+1	0 goals	Lose	1	0 goals	Win
+1 goal	Void	1 goal	Void
+2+ goals	Win	2+ goals	Lose
+1.25	0 goals	Lose	1.25	0 goals	Win
+1 goal	Half lose	1 goal	Half win
+2+ goals	Win	2+ goals	Lose
+1.5	0 or 1 goals	Lose	1.5	0 or 1 goals	Win
+2+ goals	Win	2+ goals	Lose
+1.75	0 or 1 goals	Lose	1.75	0 or 1 goals	Win
+2 goals	Half win	2 goals	Half lose
+3+ goals	Win	3+ goals	Lose
+2	0 or 1 goals	Lose	2	0 or 1 goals	Win
+2 goals	Void	2 goals	Void
+3+ goals	Win	3+ goals	Lose
+2.25	0 or 1 goals	Lose	2.25	0 or 1 goals	Win
+2 goals	Half lose	2 goals	Half win
+3+ goals	Win	3+ goals	Lose
+2.5	0 - 2 goals	Lose	2.5	0 - 2 goals	Win
+3+ goals	Win	3+ goals	Lose
+2.75	0 - 2 goals	Lose	2.75	0 - 2 goals	Win
+3 goals	Half win	3 goals	Half lose
+4+ goals	Win	4+ goals	Lose
+3	0 - 2 goals	Lose	3	0 - 2 goals	Win
+3 goals	Void	3 goals	Void
+4+ goals	Win	4+ goals	Lose
+Home Team Over/Under
+Predict whether the total number of goals scored by Home team in regular time is over/under a given line.
+
+Away Team Over/Under
+Predict whether the total number of goals scored by Away team in regular time is over/under a given line.
+
+GG/NG
+Predict whether both teams will score in the match at regular time. *Yes (GG both teams score) *No (NG any team not to score).
+
+To Qualify
+Predict which team will qualify to the next round.
+
+Exact Goals
+Predict the exact number of goals at regular time.
+
+Will There Be Overtime
+Predict whether overtime will be played in the match.
+
+Goal Range
+Predict the range of goals scored at regular time.
+
+Odd/Even
+Predict whether the total number of goals in the match will be odd or even. No goal counts as even.
+
+Winning Margin
+Predict by how many goals the winning team will win the match.
+
+Teams to Score 
+Predict which team will score in the match.
+
+1X2 & GG/NG
+Predict the winner in regular time and whether both teams will score.
+
+Over/Under & GG/NG
+Predict whether the total number of goals at regular time is over/under a given line and if both teams will score.
+
+1X2 & Over/Under
+Predict the winner in regular time and whether the total number of goals at regular time is over/under a given line.
+
+1st/2nd Half GG/NG
+Will both teams score at least one goal each during 1st/2nd half.
+
+Correct Score
+Predict the correct score at the end of regular time.
+
+Half Time/Full Time
+Predict the result at the end of the 1st half and the final result at regular time.
+
+Winning Method
+Predict the winning team and the winning method in the match. Please note match with multiple legs will consider a combined result of all legs.
+
+Double Chance & GG/NG
+Predict the match result combining two of the three possible outcomes and whether both teams will score.
+
+Double Chance & Over/Under
+Predict the match result combining two of the three possible outcomes and whether the total number of goals scored in regular time are over/under a given line.
+
+Next Goal
+Predict which team will score the Nth goal in the match.
+
+Last Goal
+Predict which team will score the last goal in the match.
+
+When Will the Nth Goal Be Scored (10 min interval)
+Predict at which time interval (10mins) will the Nth goal be scored.
+
+5/10/15 minutes - Nth Goal from a to b
+Predict which team will score the Nth goal within a time interval of 5/10/15 mins from start time point to end time point.
+
+5/10/15 minutes – Over/Under from a to b
+Predict whether the total number of goals within a time interval of 5/10/15 mins from start time point to end time point is over/under a given line.
+
+Overtime & Goal
+Predict whether there is overtime match and goal in overtime match. This game is only available to those match that allow overtime, for example, cup match.
+
+*Yes (there is overtime and goal in the overtime) *No (there is no overtime or there is no goal in the overtime).
+
+Overtime – 1X2
+Predict the winner in the overtime.
+
+Overtime - Nth Goal
+Predict which team will score the Nth goal during the overtime.
+
+Overtime – Over/Under
+Predict whether the total number of goals scored during the overtime will be over/under a given line.
+
+Overtime – Handicap
+Predict the result in the overtime while taking the handicap into consideration.
+
+Overtime - Correct Score
+Predict the correct score in the overtime.
+
+Penalty Shootout - Winning Margin
+Predict by how many goals the winning team will win the penalty shootout.
+
+Penalty Shootout – Over/Under
+Predict whether the total number of goals scored during the penalty shootout is over/under a given line.
+
+Penalty Shootout - Exact Goals
+Predict the exact number of goals in the penalty shootout.
+
+Penalty Shootout - Odd/Even
+Predict whether the total number of goals in penalty shootout will be odd or even.
+
+Penalty Shootout - Nth Penalty Scored
+Will the Nth penalty be scored.
+
+Penalty Shootout - Nth Goal
+Which team will score the Nth goal in penalty shootout.
+
+Penalty Shootout - Home Over/Under
+Predict whether the total number of goals scored by Home team in penalty shootout is over/under a given line.
+
+Penalty Shootout – Away Over/Under
+Predict whether the total number of goals scored by Away team in penalty shootout is over/under a given line.
+
+Penalty Shootout - Home Odd/Even
+Predict whether the total number of goals scored by Home team in penalty shootout will be odd or even. No goal counts as even.
+
+Penalty Shootout - Away Odd/Even
+Predict whether the total number of goals scored by Away team in penalty shootout will be odd or even. No goal counts as even.
+
+Penalty Shootout - Correct Score
+Predict the correct score in the penalty shootout.
+
+Home Team Exact Goals
+Predict the exact number of goals scored by Home team in regular time.
+
+Away Team Exact Goals
+Predict the exact number of goals scored by Away team in regular time.
+
+Home Team Odd/Even
+Predict whether the total number of goals scored by Home team in regular time will be odd or even. No goal counts as even.
+
+Away Team Odd/Even
+Predict whether the total number of goals scored by Away team in regular time will be odd or even. No goal counts as even.
+
+Home Team Clean Sheet
+Will Home team keep a clean sheet in regular time.
+
+Away Team Clean Sheet
+Will the Away team keep a clean sheet in regular time.
+
+Multigoals
+Predict how many goals will be scored in regular time.
+
+Home Multigoals
+Predict how many goals will Home team score in regular time.
+
+Away Multigoals
+Predict how many goals will Away team score in regular time.
+
+Multiscores
+Predict the final result of the game in regular time.
+
+1st Half – Multigoals
+Predict how many goals will be scored in 1st half.
+
+2nd Half - Multigoals
+Predict how many goals will be scored in 2nd half.
+
+Home Team to Score Both Halves
+Predict if Home team will score in both halves.
+
+Away Team to Score Both Halves
+Predict if Away team will score in both halves.
+
+Both Halves Over x.5
+Predict whether the number of goals scored in each half is over the given line.
+
+Both Halves Under x.5
+Predict whether the number of goals scored in each half is under the given line.
+
+1st Half - Home Team Over/Under
+Predict whether the total number of goals scored by Home team in the 1st half is over/under a given line.
+
+1st Half – Away Team Over/Under
+Predict whether the total number of goals scored by Away team in the 1st half is over/under a given line.
+
+1st Half - Exact Goals
+Predict the exact number of goals scored in the 1st half.
+
+1st Half – Home Team Exact Goals
+Predict the exact number of goals scored by Home team in the 1st half.
+
+1st Half – Away Team Exact Goals
+Predict the exact number of goals scored by Away team in the 1st half.
+
+1st half - Odd/Even
+Predict whether the total number of goals scored in the 1st half will be odd or even. No goal counts as even.
+
+1st Half – GG/NG
+Will both teams score at least one goal each in the 1st half.
+
+1st half – Home Team Clean Sheet
+Will Home team keep a clean sheet in the 1st half.
+
+1st half – Away Team Clean Sheet
+Will Away team keep a clean sheet in the 1st half.
+
+Player Assists
+Predict whether a player will assist at regular time.
+
+Player Goals
+Predict whether a player will score at regular time.
+
+1st Half - Correct Score
+Predict the correct score in the 1st half.
+
+2nd Half - Nth Goal
+Predict which team will score the Nth goal in the 2nd half.
+
+2nd Half - Home Team Over/Under
+Predict whether the total number of goals scored by Home team in the 2nd half is over/under a given line.
+
+2nd Half - Away Team Over/Under
+Predict whether the total number of goals scored by Away team in the 2nd half is over/under a given line.
+
+2nd Half - Exact Goals
+Predict the exact number of goals scored in the 2nd half.
+
+2nd Half - Odd/Even
+Predict whether the total number of goals scored in the 2nd half will be odd or even. No goal counts as even.
+
+2nd half – GG/NG
+Will both teams score at least one goal each in the 2nd half.
+
+2nd Half - Home Team Clean Sheet
+Will the Home team keep a clean sheet in the 2nd half.
+
+2nd Half - Away Team Clean Sheet
+Will the Away team keep a clean sheet in the 2nd half.
+
+2nd Half - Correct Score
+Predict the correct score in the 2nd half.
+
+Overtime 1st Half – 1X2
+Predict the winner in the 1st half of the overtime.
+
+Overtime 1st Half – Handicap
+Predict the result in the 1st half of the overtime while taking the handicap into consideration.
+
+Overtime 1st Half - Correct Score
+Predict the correct score in the 1st half of the overtime.
+
+Half Time/Full Time Correct Score
+Predict the correct score at the end of the 1st half and the final result at regular time.
+
+Home Team to Win Both Halves
+Will Home team score more goals than the Away team in both halves.
+
+Away Team to Win Both Halves
+Will Away team score more goals than the Home team in both halves.
+
+Home Team to Win Either Half
+Will Home team win at least one of the halves.
+
+Away Team to Win Either Half
+Will Away team win at least one of the halves.
+
+Highest Scoring Half
+Predict in which half most goals will be scored.
+
+Home Team Highest Scoring Half
+Predict the half with most goals scored by Home team.
+
+Away Team Highest Scoring Half
+Predict the half with most goals scored by Away team.
+
+Double Chance & 1st Half GG/NG
+Predict the match result combining two of the three possible outcomes and whether both teams will score in the 1st half.
+
+Double Chance & 2nd Half GG/NG
+Predict the match result combining two of the three possible outcomes and whether both teams will score in the 2nd half.
+
+1st Half - Double Chance & GG/NG
+Predict the result in the 1st half combining two of the three possible outcomes and whether both teams will score in the 1st half.
+
+2nd Half - 1X2 & GG/NG
+Predict the result in the 2nd half and whether both teams will score in the 2nd half.
+
+2nd Half - 1X2 & Over/Under
+Predict the result in the 2nd half and whether the total number of goals scored in the 2nd half is over/under a given line.
+
+2nd Half - Double Chance & GG/NG
+Predict the result in the 2nd half combining two of the three possible outcomes and whether both teams will score in the 2nd half.
+
+1st Half – 1X2
+Which team will win the 1st half.
+
+1st Half - Which Team Will Win the Rest
+Which team will win the rest of the 1st half ignoring the current score.
+
+1st Half - Nth Goal
+Predict which team will score the Nth goal in the 1st half.
+
+1st Half - Double Chance
+Predict the result of the 1st half combining two of the three possible outcomes (1X, X2 or 12).
+
+1st Half - Draw No Bet
+Predict the winner of the 1st half. If the teams draw, the selection will be voided.
+
+1st Half - Handicap
+Predict the winner in 1st half taking in consideration the handicap in brackets.
+
+1st Half – Over/Under
+Predict whether the total number of goals scored in the 1st half is over/under a given line.
+
+1st Half – 1X2 & GG/NG
+Predict the result in the 1st half and whether both teams will score in the 1st half.
+
+1st Half – 1X2 & Over/Under
+Predict the result in the 1st half and whether the total number of goals scored in the 1st half is over/under a given line.
+
+2nd Half – 1X2
+Which team will win the 2nd half.
+
+2nd Half - Double Chance
+Predict the result of the 2nd half combining two of the three possible outcomes (1X, X2 or 12).
+
+2nd Half - Draw No Bet
+Predict the winner of the 2nd half. If the teams draw, the selection will be voided.
+
+2nd Half - Handicap
+Predict the winner in 2nd half taking in consideration the handicap in brackets.
+
+2nd Half – Over/Under
+Predict whether the total number of goals scored in the 2nd half is over/under a given line.
+
+Booking 1X2
+Predict which team will be given more bookings at regular time. *Yellow Card = 1 booking; *Red Card = 2 bookings. The second Yellow Card for a player which leads to a Red Card is not considered.
+
+Nth Booking
+Which team will be given the Nth booking.
+
+Total Booking Points
+Predict whether the total number of booking points in the regular time is over/under a given line. *Yellow Card = 10 points, *Red Card = 25 points. The second Yellow Card for a player which leads to a Red Card is not considered.
+
+Total Bookings
+Predict whether the total number of bookings given in the regular time is over/under a given line. *Yellow Card = 1 booking, *Red Card = 2 bookings. The second Yellow Card for a player which leads to a Red Card is not considered.
+
+Home Team Total Bookings
+Predict whether the total number of bookings given for Home team in the regular time is over/under a given line. *Yellow Card = 1 booking, *Red Card = 2 bookings. The second yellow card for a player which leads to a red card is not considered.
+
+Away Team Total Bookings
+Predict whether the total number of bookings given for Away team in the regular time is over/under a given line. *Yellow Card = 1 booking, *Red Card = 2 bookings. The second yellow card for a player which leads to a red card is not considered.
+
+Exact Bookings
+Predict the exact number of bookings given at regular time. *Yellow Card = 1 booking, *Red Card = 2 bookings. The second yellow card for a player which leads to a red card is not considered.
+
+Home Team Exact Bookings
+Predict the exact number of bookings given to Home team in regular time. *Yellow Card = 1 booking, *Red Card = 2 bookings. The second yellow card for a player which leads to a red card is not considered.
+
+Away Team Exact Bookings
+Predict the exact number of bookings given to Away team in regular time. *Yellow Card = 1 booking, *Red Card = 2 bookings. The second yellow card for a player which leads to a red card is not considered.
+
+Booking Point Range
+Predict the range of booking points at regular time. *Yellow card = 10 points, *Red card = 25 points. The second Yellow card for a player which leads to a red card is not considered.
+
+Sending Off
+Predict if there will be player(s) sent off at regular time.
+
+Home Team Sending Off
+Predict if there will be Home team player(s) sent off at regular time.
+
+Away Team Sending Off
+Predict if there will be Away team player(s) sent off at regular time.
+
+1st Half - Booking 1X2
+Predict which team will be given more bookings in the 1st half. *yellow card = 1 booking; *red card = 2 bookings. The second Yellow Card for a player which leads to a Red Card is not considered.
+
+1st Half - Nth Booking
+Which team will be given the Nth booking in the 1st half.
+
+1st Half - Total Booking Points
+Predict whether the total number of booking points in the 1st half is over/under a given line. *yellow card = 10 points, *red card = 25 points. The second yellow card for a player which leads to a red card is not considered.
+
+1st Half - Total Bookings
+Predict whether the total number of bookings given in the 1st half is over/under a given line. *Yellow Card = 1 booking, *Red Card = 2 bookings.
+
+1st Half – Home Team Total Bookings
+Predict whether the total number of bookings given to Home team in the 1st half is over/under a given line. *Yellow Card = 1 booking, *Red Card = 2 bookings. The second yellow card for a player which leads to a red card is not considered.
+
+1st Half – Away Team Total Bookings
+Predict whether the total number of bookings given to Away team in the 1st half is over/under a given line. *Yellow Card = 1 booking, *Red Card = 2 bookings. The second yellow card for a player which leads to a red card is not considered.
+
+1st Half - Exact Bookings
+Predict the exact number of bookings given in 1st half. *Yellow Card = 1 booking, *Red Card = 2 bookings. The second yellow card for a player which leads to a red card is not considered.
+
+1st Half – Home Team Exact Bookings
+Predict the exact number of bookings given to Home team in the 1st half. *Yellow Card = 1 booking, *Red Card = 2 bookings. The second yellow card for a player which leads to a red card is not considered.
+
+1st Half – Away Team Exact Bookings
+Predict the exact number of bookings given to Away team in the 1st half. *Yellow Card = 1 booking, *Red Card = 2 bookings. The second yellow card for a player which leads to a red card is not considered.
+
+1st Half - Booking Point Range
+Predict the range of booking points in the 1st half. *yellow card = 10 points, *red card = 25 points. The second yellow card for a player which leads to a red card is not considered.
+
+1st Half - Sending Off
+Predict if there will be player(s) sent off in the 1st half.
+
+1st Half - Home Team Sending Off
+Predict if there will be Home team player(s) sent off in the 1st half.
+
+1st Half – Away Team Sending Off
+Predict if there will be Away team player(s) sent off in the 1st half.
+
+5/10/15 minutes - Booking 1X2 from a to b
+Predict which team will be given more bookings within 5/10/15 minutes interval.
+
+*yellow card = 1 booking; *red card = 2 bookings. The second yellow card for a player which leads to a red card is not considered.
+
+5/10/15 minutes - Total Bookings from a to b
+Predict whether the total number of bookings given within 5/10/15 minutes interval is over/under a given line. *Yellow Card = 1 booking, *Red Card = 2 bookings. The second yellow card for a player which leads to a red card is not considered.
+
+5/10/15 minutes - Sending Off from a to b
+Predict if there will be player(s) sent off within 5/10/15 minutes interval.
+
+5/10/15 minutes – Home Team Sending Off from a to b
+Predict if there will be Home team player(s) sent off within 5/10/15 minutes interval.
+
+5/10/15 minutes – Away Team Sending Off from a to b
+Predict if there will be Away team player(s) sent off within 5/10/15 minutes interval.
+
+Corners - 1X2
+Predict which team will get most corners at regular time.
+
+Nth Corner
+Predict which team will get the Nth corner at regular time.
+
+Last Corner
+Predict which team will get the last corner at regular time.
+
+Corner Handicap
+Predict which team will get most corners at regular time taking in consideration the handicap in brackets.
+
+Corners - Over/Under
+Predict whether the total number of corners at regular time is over/under a given line.
+
+Home Team Corners - Over/Under
+Predict whether the total number of corners for the Home team at regular time is over/under a given line.
+
+Away Team Corners - Over/Under
+Predict whether the total number of corners for the Away team at regular time is over/under a given line.
+
+Corner Range
+Predict the range of awarded corners at regular time.
+
+Home Team Corner Range
+Predict the range of awarded corners for the Home team at regular time.
+
+Away Team Corner Range
+Predict the range of awarded corners for the Away team at regular time.
+
+Odd/Even Corners
+Predict whether the total number of corners in the match will be odd or even. No corner counts as even.
+
+1st Half - Corner 1X2
+Predict which team will get most corners in the 1st half.
+
+1st Half - Nth Corner
+Predict which team will get the Nth corner in the 1st half.
+
+1st Half - Last Corner
+Predict which team will get the last corner in the 1st half.
+
+1st Half - Corner Handicap
+Predict which team will get most corners in the 1st half taking in consideration the handicap in brackets.
+
+1st Half Corners - Over/Under
+Predict whether the total number of corners in the 1st half is over/under a given line.
+
+1st Half - Home Corners Over/Under
+Predict whether the total number of corners awarded to Home team in the 1st half is over/under a given line.
+
+1st Half – Away Corners Over/Under
+Predict whether the total number of corners awarded to Away team in the 1st half is over/under a given line.
+
+1st Half - Home Exact Corners
+Predict the exact number of corners awarded to Home team in the 1st half.
+
+1st Half - Away Exact Corners
+Predict the exact number of corners awarded to Away team in the 1st half.
+
+1st Half - Corner Range
+Predict the range of corners awarded in the 1st half.
+
+1st Half - Odd/Even Corners
+Predict whether the total number of corners in the 1st half will be odd or even. No corner counts as even.
+
+5/10/15 minutes - Corners 1X2 from a to b
+Predict which team will get most corners within 5/10/15 minutes interval.
+
+5/10/15 minutes - Xth Corner from a to b
+Predict which team will get the Xth corner within 5/10/15 minutes interval.
+
+5/10/15 minutes - Corner Handicap from a to b
+Predict which team will get most corners within 5/10/15 minutes interval taking in consideration the handicap in brackets.
+
+5/10/15 minutes - Corners - Over/Under from a to b
+Predict whether the total number of corners within 5/10/15 minutes interval is over/under a given line.
+
+5/10/15 minutes - Home Corners - Over/Under from a to b
+Predict whether the total number of corners awarded to Home team within 5/10/15 minutes interval is over/under a given line.
+
+5/10/15 minutes - Away Corners - Over/Under from a to b
+Predict whether the total number of corners awarded to Away team within 5/10/15 minutes interval is over/under a given line.
+
+5/10/15 minutes - Odd/Even Corners from a to b
+Predict whether the total number of corners within 5/10/15 minutes interval will be odd or even. No corner counts as even.
+
+Race to X Corners
+Which team will reach X corners in the game first.
+
+1st Half - Race to X Corners
+Which team will first reach X corners in the 1st half.
+
+5/10/15 minutes – 1X2 from a to b
+Predict the result within 5/10/15 minutes interval
+
+Overtime - Which Team Will Win the Rest
+Predict the result for the rest of the overtime.
+
+Penalty Shootout – Winner
+Predict the winner in the penalty shootout.
+
+Penalty Shootout - Winner & Over/Under
+Predict the winner in the penalty shootout and whether the total number of goals scored in the penalty shootout is over/under a given line.
+
+Nth Goal & 1X2
+Predict which team will score the Nth goal and which team will win the match.
+
+Home Team to Win to Nill
+Will Home team win the game and keep a clean sheet at regular time.
+
+Away Team to Win to Nill
+Will Away team win the game and keep a clean sheet at regular time.
+
+Nth Penalty Scored
+Will the Nth penalty be scored.
+
+Rest Match Winner
+Predict the result for the rest of the regular time.
+
+Half Time/Full Time & Over/Under
+Predict the result at the end of the 1st half and the final result at regular time and whether the total number of goals scored in the regular time is over/under a given line.
+
+Half Time/Full Time & 1st Half Over/Under
+Predict the result at the end of the 1st half and the final result at regular time and whether the total number of goals scored in the 1st half is over/under a given line.
+
+Half Time/Full Time & Exact Goals
+Predict the result at the end of the 1st half and the final result at regular time and the exact number of goals scored in regular time.
+
+Home Team or Over Goals
+Predict whether Home team will win or the total number of goals is over a given line.
+
+Home Team or Under Goals
+Predict whether Home team will win or the total number of goals is under a given line.
+
+Draw or Over Goals
+Predict whether the match will end in a draw at regular time or the total number of goals is over a given line.
+
+Draw or Under Goals
+Predict whether the match will end in a draw at regular time or the total number of goals is under a given line.
+
+Away Team or Over Goals
+Predict whether Away team will win or the total number of goals is over a given line.
+
+Away Team or Under Goals
+Predict whether Away team will win or the total number of goals is under a given line.
+
+Home Team or GG/NG
+Predict whether Home team will win or both teams will score at regular time.
+
+Draw or GG/NG
+Predict whether the match will end in a draw at regular time or both teams will score at regular time.
+
+Away Team or GG/NG
+Predict whether Away team will win or both teams will score at regular time.
+
+Home Team or Any Clean Sheet
+Predict whether Home team will win or any of the teams will keep a clean sheet at regular time.
+
+Draw or Any Clean Sheet
+Predict whether the match will end in a draw or any of the teams will keep a clean sheet at regular time.
+
+Away Team or Any Clean Sheet
+Predict whether Away team will win or any of the teams will keep a clean sheet at regular time.
+
+1 minute – Over/Under from a to b
+Predict whether the total number of goals within a time interval of 1 minute is over/under a given line.
+
+1 minute – Over/Under Corners from a to b
+Predict whether the total number of corners within a time interval of 1 minute is over/under a given line.
+
+1 minute – Over/Under Bookings from a to b
+Predict whether the total number of bookings within a time interval of 1 minute is over/under a given line.
+
+1 minute – Over/Under Offsides from a to b
+Predict whether the total number of offsides within a time interval of 1 minute is over/under a given line.
+
+1 minute – Over/Under Penalties from a to b
+Predict whether the total number of penalties within a time interval of 1 minute is over/under a given line.
+
+Goal bounds - 1st Half
+Goal Bounds - 1st Half is a bet where you predict the number of goals scored by both teams in a certain goal range in 1st half.
+
+Goal bounds
+Goal Bounds is a bet where you predict the number of goals scored by both teams in a certain goal range.
+
+Goal bounds - Home
+Goal Bounds - Home is a bet where you predict the number of goals scored by the Home team in a certain goal range.
+
+Goal bounds - Away
+Goal Bounds - Away is a bet where you predict the number of goals scored by the Away team in a certain goal range.
+
+Excluded goals
+Excluded Goals is a bet where you bet against a certain amount of goals in the match.
+
+Excluded goals - Home
+Excluded  Goals - Home is a bet where you bet against a certain number of Home goals in the match.
+
+Excluded goals - Away
+Excluded  Goals - Away is a bet where you bet against a certain number of Away goals in the match.
+
+Excluded goals  - 1st Half
+Excluded  Goals 1st Half is a bet where you bet against a certain number of goals in the First Half.
+
+
+BASIC
+
+
+Basic Match Outcome
+1 → Home team wins
+X → Draw
+2 → Away team wins
+Goals Markets
+GG (BTTS) → Both teams to score (Yes)
+NG → Both teams NOT to score
+Over 0.5 → At least 1 goal in the match
+Over 1.5 → 2 or more goals
+Over 2.5 → 3 or more goals
+Under 2.5 → 0–2 goals
+Over 3.5 / Under 3.5 → 4+ goals / 0–3 goals
+Double Chance (Safer Options)
+1X → Home win or draw
+X2 → Away win or draw
+12 → Either team wins (no draw)
+Half-Time / Full-Time
+HT/FT (1/1) → Home team leads at half-time and wins full-time
+HT/FT (X/2) → Draw at half-time, away team wins
+(Many combinations exist)
+Draw No Bet (DNB)
+DNB 1 → Home win (stake refunded if draw)
+DNB 2 → Away win (stake refunded if draw)
+Correct Score
+Predict exact scoreline (e.g., 2–1, 1–1)
+Handicap (Advanced)
+Home -1 → Home must win by 2+ goals
+Away +1 → Away can lose by 1 goal and still win bet

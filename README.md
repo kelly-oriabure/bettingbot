@@ -29,10 +29,26 @@ For each match, the bot provides:
 ### 1. Telegram Bot Token
 Create via [@BotFather](https://t.me/BotFather), then set as `TELEGRAM_BOT_TOKEN` env var.
 
-### 2. API Keys
-- **API-Football:** Free at https://www.api-football.com (100 req/day)
-- **The Odds API:** Free at https://the-odds-api.com (500 req/month)
-- **OpenRouter:** For enhanced LLM analysis (optional)
+### 2. Configuration
+
+Required environment variables:
+
+| Variable | Purpose |
+|----------|---------|
+| `TELEGRAM_BOT_TOKEN` | Bot token from BotFather. |
+| `TELEGRAM_CHANNEL` | Telegram channel ID or handle for MVP broadcasts. |
+| `API_FOOTBALL_KEY` | API-Football key for fixtures, results, and historical data. |
+| `ODDS_API_KEY` | Primary The Odds API key. |
+| `ODDS_API_BACKUP_KEYS` | Optional comma-separated backup keys for The Odds API. |
+| `ODDS_PROVIDER` | Odds provider selector. Default: `odds_api`. |
+| `DATABASE_URL` | Database URL, currently SQLite-friendly for MVP. |
+| `FIRMBETTING_DB_PATH` | Optional local SQLite database path used by future storage tasks. |
+
+Never commit real provider credentials, Telegram tokens, or paid data-feed secrets.
+
+Provider signup links:
+- **API-Football:** https://www.api-football.com
+- **The Odds API:** https://the-odds-api.com
 
 ### 3. Local Run
 ```bash
@@ -40,13 +56,20 @@ cd bettingbot
 python3 -m venv venv
 venv/bin/pip install -r requirements.txt
 export TELEGRAM_BOT_TOKEN="your-token"
+export TELEGRAM_CHANNEL="@your-channel"
 export API_FOOTBALL_KEY="your-key"
 export ODDS_API_KEY="your-key"
+export ODDS_API_BACKUP_KEYS=""
+export ODDS_PROVIDER="odds_api"
+export DATABASE_URL="sqlite:///bettingbot.db"
 python -m app
 ```
 
 ### 4. Deploy on Coolify
 Push to GitHub → Coolify auto-deploys via Dockerfile.
+
+Before enabling the Telegram scheduler, follow the production checklist in
+`DEPLOYMENT_CHECKLIST.md` and the daily operator runbook in `ADMIN_RUNBOOK.md`.
 
 ## Commands
 
