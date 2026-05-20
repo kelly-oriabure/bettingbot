@@ -10,22 +10,23 @@ Read `AGENTS.md` first and follow it strictly.
 - `ODDS_API_KEY`: Primary The Odds API key.
 - `ODDS_API_BACKUP_KEYS`: Optional comma-separated backup keys for The Odds API.
 - `ODDS_PROVIDER`: Odds provider selector. Use `odds_api` for MVP.
-- `DATABASE_URL`: SQLite database URL if used by deployment tooling.
-- `FIRMBETTING_DB_PATH`: Local SQLite database path for MVP storage.
+- `DATABASE_URL`: Production database URL. Use the Neon/Postgres URL in Coolify.
+- `FIRMBETTING_DB_PATH`: Local SQLite database path for dev/test only.
 
 Never commit real credentials, Telegram tokens, or paid data-feed secrets.
 Rotate any credential that was ever committed to source.
 
 ## Database Initialization
 
-1. Set `FIRMBETTING_DB_PATH` or `DATABASE_URL`.
-2. Run database initialization before any scheduled job:
+1. In Coolify, set `DATABASE_URL` to the Neon/Postgres connection URL. Use the raw `postgresql://...` URL value when possible.
+2. For local dev only, use `FIRMBETTING_DB_PATH` or a `sqlite:///...` `DATABASE_URL`.
+3. Run database initialization before any scheduled job:
 
 ```bash
 python3 -c "from app.data.storage import initialize_database; initialize_database()"
 ```
 
-3. Confirm the database contains the MVP tables: `fixtures`, `odds_snapshots`, `predictions`, `results`, `settlements`, and `model_versions`.
+4. Confirm the database contains the MVP tables: `fixtures`, `odds_snapshots`, `predictions`, `results`, `settlements`, and `model_versions`.
 
 ## Model Training Before First Broadcast
 

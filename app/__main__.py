@@ -27,10 +27,18 @@ def main():
     import asyncio
     from app.bot.bot import create_bot, post_init, post_shutdown
     from app.bot.health import start_health_server, set_bot_running
+    from app.data.storage import StorageError, initialize_database
 
     token = os.environ.get("TELEGRAM_BOT_TOKEN")
     if not token or token == "your-telegram-bot-token-from-botfather":
         logger.error("TELEGRAM_BOT_TOKEN not set! Get one from @BotFather on Telegram.")
+        sys.exit(1)
+
+    try:
+        initialize_database()
+        logger.info("Database initialized and ready")
+    except StorageError as exc:
+        logger.error("Database initialization failed: %s", exc)
         sys.exit(1)
 
     # Start health check server for Coolify

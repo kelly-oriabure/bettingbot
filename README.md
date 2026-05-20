@@ -41,8 +41,8 @@ Required environment variables:
 | `ODDS_API_KEY` | Primary The Odds API key. |
 | `ODDS_API_BACKUP_KEYS` | Optional comma-separated backup keys for The Odds API. |
 | `ODDS_PROVIDER` | Odds provider selector. Default: `odds_api`. |
-| `DATABASE_URL` | Database URL, currently SQLite-friendly for MVP. |
-| `FIRMBETTING_DB_PATH` | Optional local SQLite database path used by future storage tasks. |
+| `DATABASE_URL` | Production database URL. Use Neon/Postgres on Coolify; SQLite is supported for local dev. |
+| `FIRMBETTING_DB_PATH` | Optional local SQLite path for dev/test only. |
 
 Never commit real provider credentials, Telegram tokens, or paid data-feed secrets.
 
@@ -67,6 +67,10 @@ python -m app
 
 ### 4. Deploy on Coolify
 Push to GitHub → Coolify auto-deploys via Dockerfile.
+
+In Coolify, set `DATABASE_URL` to the raw Neon/Postgres connection URL. Do not
+commit it to the repo. The app also tolerates the surrounding `psql '...'`
+wrapper, but the raw URL is preferred.
 
 Before enabling the Telegram scheduler, follow the production checklist in
 `DEPLOYMENT_CHECKLIST.md` and the daily operator runbook in `ADMIN_RUNBOOK.md`.

@@ -18,6 +18,7 @@ import asyncio
 import json
 import logging
 from datetime import datetime, timedelta
+from datetime import date as date_type
 from typing import Dict, List, Optional
 
 from telegram import Bot
@@ -287,3 +288,33 @@ async def send_morning_broadcast(bot_token: str):
 
     except Exception as e:
         logger.error(f"Morning broadcast failed: {e}", exc_info=True)
+
+
+async def send_result_comparison_broadcast(
+    bot_token: str,
+    target_date: Optional[date_type] = None,
+    db_path: Optional[str] = None,
+) -> List[str]:
+    """Send the separate prediction-vs-result comparison broadcast."""
+    bot = Bot(token=bot_token)
+
+    if not CHANNEL_ID:
+        logger.warning("TELEGRAM_CHANNEL not set, skipping result comparison broadcast")
+        return []
+
+    from app.broadcast import build_result_comparison_broadcast
+
+    target_date = target_date or datetime.utcnow().date()
+    messages = build_result_comparison_broadcast(db_path, target_date)
+    for message in messages:
+        await bot.send_message(chat_id=CHANNEL_ID, text=message)
+        await asyncio.sleep(0.3)
+
+    _set_last_broadcast_date(f"{target_date.isoformat()}_results")
+    logger.info("✅ Result comparison broadcast sent: %s message(s)", len(messages))
+    return messages
+
+
+async def send_evening_recap(bot_token: str):
+    """Backward-compatible evening job name for result-comparison broadcast."""
+    return await send_result_comparison_broadcast(bot_token)

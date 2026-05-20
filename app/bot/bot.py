@@ -485,11 +485,18 @@ def create_bot(token: str, post_init=None, post_shutdown=None) -> Application:
         name="Morning Broadcast",
     )
     
-    # Evening recap REMOVED — reduced to 1 broadcast/day to save API credits
+    # Separate result-comparison broadcast: 9 PM Lagos (8 PM UTC)
+    scheduler.add_job(
+        _send_evening_recap,
+        trigger=CronTrigger(hour=20, minute=0, timezone="UTC"),
+        args=[app],
+        id="result_comparison_broadcast",
+        name="Result Comparison Broadcast",
+    )
     
     # Store scheduler — start it in post_init when event loop is running
     app._job_scheduler = scheduler
-    logger.info("Bot created with all handlers + daily scheduler (morning 5 AM UTC only)")
+    logger.info("Bot created with daily prediction and result-comparison broadcasts")
     return app
 
 
@@ -543,10 +550,10 @@ async def post_init(app: Application):
             from app.scheduler import _set_last_broadcast_date
             _set_last_broadcast_date(today_str)
         
-        if now.hour >= 21 and last_date < f"{today_str}_evening":
-            logger.info("⏰ Missed evening recap — sending now")
+        if now.hour >= 20 and last_date < f"{today_str}_results":
+            logger.info("⏰ Missed result-comparison broadcast — sending now")
             await send_evening_recap(app.bot.token)
-            _set_last_broadcast_date(f"{today_str}_evening")
+            _set_last_broadcast_date(f"{today_str}_results")
     except Exception as e:
         logger.warning(f"Missed broadcast check failed: {e}")
 

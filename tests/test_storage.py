@@ -2,13 +2,16 @@ import os
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from app.data.storage import (
     StorageError,
+    _translate_postgres_sql,
     connect,
     dumps_payload,
     initialize_database,
     loads_payload,
+    normalize_database_url,
     session,
 )
 
@@ -105,6 +108,45 @@ class StorageTests(unittest.TestCase):
 
             self.assertEqual(db_path, initialized)
             self.assertTrue(db_path.exists())
+
+    def test_postgres_database_url_uses_postgres_connector(self):
+        old_database_url = os.environ.get("DATABASE_URL")
+        old_db_path = os.environ.get("FIRMBETTING_DB_PATH")
+        os.environ["DATABASE_URL"] = "postgresql://user:pass@example.com/firmbetting"
+        os.environ.pop("FIRMBETTING_DB_PATH", None)
+        try:
+            with patch("app.data.storage._connect_postgres", return_value="postgres-connection") as mocked:
+                connection = connect()
+        finally:
+            if old_database_url is None:
+                os.environ.pop("DATABASE_URL", None)
+            else:
+                os.environ["DATABASE_URL"] = old_database_url
+            if old_db_path is None:
+                os.environ.pop("FIRMBETTING_DB_PATH", None)
+            else:
+                os.environ["FIRMBETTING_DB_PATH"] = old_db_path
+
+        self.assertEqual("postgres-connection", connection)
+        mocked.assert_called_once_with("postgresql://user:pass@example.com/firmbetting")
+
+    def test_postgres_translation_handles_placeholders_and_null_safe_is(self):
+        sql = "SELECT id FROM odds_snapshots WHERE bookmaker IS ? AND fixture_id = ?"
+
+        translated = _translate_postgres_sql(sql)
+
+        self.assertEqual(
+            "SELECT id FROM odds_snapshots WHERE bookmaker IS NOT DISTINCT FROM %s AND fixture_id = %s",
+            translated,
+        )
+
+    def test_psql_wrapper_database_url_is_normalized(self):
+        wrapped = "psql 'postgresql://user:pass@example.com/firmbetting?sslmode=require'"
+
+        self.assertEqual(
+            "postgresql://user:pass@example.com/firmbetting?sslmode=require",
+            normalize_database_url(wrapped),
+        )
 
 
 if __name__ == "__main__":
