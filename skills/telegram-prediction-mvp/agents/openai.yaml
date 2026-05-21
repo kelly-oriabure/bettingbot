@@ -1,0 +1,4 @@
+interface:
+  display_name: "Telegram Prediction MVP"
+  short_description: "Telegram football MVP workflow."
+  default_prompt: "Use this skill when upgrading a Telegram-first football prediction app with provider ingestion, prediction storage, result settlement, Neon/Postgres or SQLite persistence, Coolify deployment, and Telegram broadcasts."

@@ -25,6 +25,31 @@ def _title_case(value: Optional[str]) -> str:
     return (value or "unknown").replace("_", " ").title()
 
 
+def format_confidence_score(confidence: Optional[str], probability: Optional[float] = None) -> str:
+    """Show a simple user-facing confidence percentage without changing stored buckets."""
+    if probability is not None:
+        return _format_percent(probability)
+    confidence_scores = {
+        "high": "80%",
+        "medium": "65%",
+        "low": "50%",
+    }
+    return confidence_scores.get(confidence or "", "50%")
+
+
+def confidence_icon(confidence_percent: str) -> str:
+    """Return a simple Telegram-friendly confidence marker."""
+    try:
+        value = float(confidence_percent.rstrip("%"))
+    except ValueError:
+        value = 0.0
+    if value >= 65:
+        return "✅"
+    if value >= 55:
+        return "🟠"
+    return "❌"
+
+
 def format_pick_label(market_type: str, selection: str, home_team: str, away_team: str) -> str:
     """Convert stored market codes into plain-language Telegram copy."""
     market_type = market_type.lower()
@@ -75,13 +100,19 @@ def _format_prediction_line(prediction: dict) -> str:
         prediction["home_team"],
         prediction["away_team"],
     )
+    confidence = format_confidence_score(prediction.get("confidence"), prediction.get("probability"))
     return (
         f"{prediction['home_team']} vs {prediction['away_team']}\n"
         f"League: {league} | Kickoff: {kickoff}\n"
         f"Prediction: {pick}\n"
-        f"Confidence: {_title_case(prediction['confidence'])}\n"
+        f"Confidence: {confidence_icon(confidence)} {confidence}\n"
         f"Why: {_simple_reason(prediction)}"
     )
+
+
+def join_message_sections(sections: list[str]) -> str:
+    """Join Telegram sections with one blank line between non-empty blocks."""
+    return "\n\n".join(section.strip() for section in sections if section.strip())
 
 
 def split_telegram_message(text: str, limit: int = TELEGRAM_SAFE_LIMIT) -> list[str]:
@@ -133,28 +164,39 @@ def build_daily_prediction_broadcast(
 
     title = f"FirmBetting Daily Picks - {target}"
     if not predictions:
-        return [
-            "\n\n".join(
-                [
-                    title,
-                    "No eligible picks are available for this date.",
-                    DISCLAIMER,
-                ]
-            )
-        ]
+        return [join_message_sections([title, "No eligible picks are available for this date.", "_Bet responsibly._"])]
 
     high_count = sum(1 for prediction in predictions if prediction.get("confidence") == "high")
     medium_count = sum(1 for prediction in predictions if prediction.get("confidence") == "medium")
-    lines = [
+    sections = [
         title,
-        "",
-        f"Today's shortlist: {len(predictions)} pick(s)",
-        f"High confidence: {high_count} | Medium confidence: {medium_count}",
-        "",
+        f"Today's shortlist: {len(predictions)} pick(s)\nHigh confidence: {high_count} | Medium confidence: {medium_count}",
     ]
-    lines.extend(f"{index}. {_format_prediction_line(prediction)}" for index, prediction in enumerate(predictions, 1))
-    lines.extend(["", "Reminder:", DISCLAIMER])
-    return split_telegram_message("\n\n".join(lines))
+    sections.extend(f"{index}. {_format_prediction_line(prediction)}" for index, prediction in enumerate(predictions, 1))
+    sections.append("_Predictions are not guaranteed. Bet responsibly._")
+    return split_telegram_message(join_message_sections(sections))
+
+
+def next_prediction_date(
+    db_path: Optional[str],
+    start_date: date,
+    market_types: Optional[Iterable[str]] = None,
+    minimum_confidence: str = "medium",
+) -> Optional[date]:
+    """Return the next date with eligible stored predictions."""
+    candidates = eligible_predictions(
+        db_path,
+        market_types=market_types,
+        minimum_confidence=minimum_confidence,
+    )
+    dates = sorted(
+        {
+            parse_provider_datetime(prediction["kickoff_time"]).date()
+            for prediction in candidates
+            if parse_provider_datetime(prediction["kickoff_time"]).date() >= start_date
+        }
+    )
+    return dates[0] if dates else None
 
 
 def _settlement_rows_for_date(db_path: Optional[str], target_date: date) -> list[dict]:

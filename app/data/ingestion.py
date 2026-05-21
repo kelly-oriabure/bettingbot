@@ -77,6 +77,18 @@ def _provider_fixture_id(match: Dict[str, Any]) -> Optional[str]:
         if isinstance(fixture, dict):
             fixture_id = fixture.get("id")
     if fixture_id is None:
+        home_team = match.get("home_team")
+        away_team = match.get("away_team")
+        kickoff = match.get("date") or match.get("kickoff_time") or match.get("commence_time")
+        if home_team and away_team and kickoff:
+            kickoff_time = parse_provider_datetime(str(kickoff)).isoformat()
+            return "|".join(
+                [
+                    normalize_team_name(str(home_team)).lower(),
+                    normalize_team_name(str(away_team)).lower(),
+                    kickoff_time,
+                ]
+            )
         return None
     return str(fixture_id)
 
@@ -325,7 +337,12 @@ async def ingest_daily_odds(
                 fixture_id = _find_fixture_id(conn, match)
                 if fixture_id is None:
                     counts["skipped"] += 1
-                    logger.warning("Skipping odds with no matching fixture: %s", match)
+                    logger.warning(
+                        "Skipping odds with no matching fixture: %s vs %s at %s",
+                        match.get("home_team"),
+                        match.get("away_team"),
+                        match.get("date") or match.get("kickoff_time") or match.get("commence_time"),
+                    )
                     continue
 
                 snapshots = _extract_odds_snapshots(match, provider_name, captured_at)

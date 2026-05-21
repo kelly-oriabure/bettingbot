@@ -349,7 +349,8 @@ class ApiFootballProvider(OddsProvider):
         leagues = [39, 140, 61, 135, 78, 848]
         all_matches = []
         
-        async with aiohttp.ClientSession() as session:
+        timeout = aiohttp.ClientTimeout(total=20)
+        async with aiohttp.ClientSession(timeout=timeout) as session:
             for league_id in leagues:
                 try:
                     async with session.get(
@@ -440,7 +441,8 @@ class SharpApiProvider(OddsProvider):
     async def get_upcoming_matches(self, hours_ahead: int = 48) -> List[Dict]:
         all_matches = []
         
-        async with aiohttp.ClientSession() as session:
+        timeout = aiohttp.ClientTimeout(total=20)
+        async with aiohttp.ClientSession(timeout=timeout) as session:
             for league_id, league_name in SHARP_API_LEAGUES.items():
                 try:
                     # SharpAPI endpoint for football matches with odds
@@ -525,7 +527,8 @@ class FootballDataClient:
         self.headers = {"x-apisports-key": self.api_key}
     
     async def get_historical_results(self, league_id: int, season: int) -> pd.DataFrame:
-        async with aiohttp.ClientSession() as session:
+        timeout = aiohttp.ClientTimeout(total=20)
+        async with aiohttp.ClientSession(timeout=timeout) as session:
             async with session.get(
                 f"{API_FOOTBALL_BASE}/fixtures",
                 headers=self.headers,

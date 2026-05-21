@@ -83,6 +83,29 @@ class FixtureIngestionTests(unittest.TestCase):
                 count = conn.execute("SELECT COUNT(*) AS count FROM fixtures").fetchone()["count"]
             self.assertEqual(1, count)
 
+    def test_fixture_without_provider_id_gets_deterministic_identity(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            db_path = Path(tmpdir) / "firmbetting.sqlite3"
+            provider = FakeFixtureProvider([
+                {
+                    "home_team": "Arsenal",
+                    "away_team": "Chelsea",
+                    "date": "2026-05-20T12:00:00Z",
+                    "league_name": "Premier League",
+                }
+            ])
+
+            first_counts = asyncio.run(ingest_daily_fixtures(provider=provider, db_path=str(db_path)))
+            second_counts = asyncio.run(ingest_daily_fixtures(provider=provider, db_path=str(db_path)))
+
+            with connect(str(db_path)) as conn:
+                rows = conn.execute("SELECT * FROM fixtures").fetchall()
+
+            self.assertEqual(1, first_counts["inserted"])
+            self.assertEqual(1, second_counts["updated"])
+            self.assertEqual(1, len(rows))
+            self.assertEqual("arsenal|chelsea|2026-05-20T12:00:00+00:00", rows[0]["provider_fixture_id"])
+
     def test_provider_failure_returns_failed_count_without_crashing(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             db_path = Path(tmpdir) / "firmbetting.sqlite3"
