@@ -476,7 +476,7 @@ def create_bot(token: str, post_init=None, post_shutdown=None) -> Application:
     from apscheduler.triggers.cron import CronTrigger
     scheduler = AsyncIOScheduler()
     
-    # Morning broadcast: 6 AM Lagos (5 AM UTC)
+    # Morning broadcast: 5:00 AM UTC
     scheduler.add_job(
         _send_morning_broadcast,
         trigger=CronTrigger(hour=5, minute=0, timezone="UTC"),
@@ -485,10 +485,10 @@ def create_bot(token: str, post_init=None, post_shutdown=None) -> Application:
         name="Morning Broadcast",
     )
     
-    # Separate result-comparison broadcast: 9 PM Lagos (8 PM UTC)
+    # Separate result-comparison broadcast: 11:50 PM UTC
     scheduler.add_job(
         _send_evening_recap,
-        trigger=CronTrigger(hour=20, minute=0, timezone="UTC"),
+        trigger=CronTrigger(hour=23, minute=50, timezone="UTC"),
         args=[app],
         id="result_comparison_broadcast",
         name="Result Comparison Broadcast",
@@ -498,6 +498,11 @@ def create_bot(token: str, post_init=None, post_shutdown=None) -> Application:
     app._job_scheduler = scheduler
     logger.info("Bot created with daily prediction and result-comparison broadcasts")
     return app
+
+
+def _is_result_broadcast_due_utc(now: datetime) -> bool:
+    """Return True at or after the 11:50 PM UTC result broadcast time."""
+    return now.hour > 23 or (now.hour == 23 and now.minute >= 50)
 
 
 async def _send_morning_broadcast(app: Application):
@@ -550,7 +555,7 @@ async def post_init(app: Application):
             from app.scheduler import _set_last_broadcast_date
             _set_last_broadcast_date(today_str)
         
-        if now.hour >= 20 and last_date < f"{today_str}_results":
+        if _is_result_broadcast_due_utc(now) and last_date < f"{today_str}_results":
             logger.info("⏰ Missed result-comparison broadcast — sending now")
             await send_evening_recap(app.bot.token)
             _set_last_broadcast_date(f"{today_str}_results")
