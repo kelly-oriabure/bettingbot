@@ -15,6 +15,16 @@ CHANNEL_ID = os.environ.get("TELEGRAM_CHANNEL", "")
 _STATE_FILE = os.path.join(os.path.dirname(__file__), "..", "data", "broadcast_state.json")
 
 
+def prediction_broadcasts_enabled() -> bool:
+    """Return whether daily prediction broadcasts should be sent."""
+    return os.environ.get("FIRMBETTING_ENABLE_PREDICTION_BROADCASTS", "0").strip().lower() in {
+        "1",
+        "true",
+        "yes",
+        "on",
+    }
+
+
 def _get_last_broadcast_date() -> str:
     """Get the date of the last successful broadcast."""
     try:
@@ -41,6 +51,10 @@ def _set_last_broadcast_date(date_str: str):
 async def send_morning_broadcast(bot_token: str):
     """Run the DB-backed prediction pipeline and send the daily picks."""
     bot = Bot(token=bot_token)
+
+    if not prediction_broadcasts_enabled():
+        logger.info("Daily prediction broadcasts are paused; skipping morning broadcast")
+        return []
 
     if not CHANNEL_ID:
         logger.warning("TELEGRAM_CHANNEL not set, skipping broadcast")

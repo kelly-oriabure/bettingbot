@@ -544,12 +544,17 @@ async def post_init(app: Application):
     # Catch up missed broadcasts (e.g., after server restart)
     try:
         from datetime import datetime
-        from app.scheduler import _get_last_broadcast_date, send_morning_broadcast, send_evening_recap
+        from app.scheduler import (
+            _get_last_broadcast_date,
+            prediction_broadcasts_enabled,
+            send_morning_broadcast,
+            send_evening_recap,
+        )
         now = datetime.utcnow()
         last_date = _get_last_broadcast_date()
         today_str = now.strftime("%Y-%m-%d")
         
-        if now.hour >= 5 and last_date < today_str:
+        if prediction_broadcasts_enabled() and now.hour >= 5 and last_date < today_str:
             logger.info("⏰ Missed morning broadcast — sending now")
             await send_morning_broadcast(app.bot.token)
             from app.scheduler import _set_last_broadcast_date
